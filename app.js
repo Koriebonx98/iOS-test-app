@@ -135,3 +135,129 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('[Service Worker] Registration failed', err));
     });
 }
+
+// YouTube Search Functionality
+// IMPORTANT: Replace with your own YouTube Data API v3 key
+// Get one from: https://console.cloud.google.com/apis/credentials
+// NOTE: Client-side API keys are visible to users. For production apps,
+// consider implementing a backend proxy to hide the API key.
+const YOUTUBE_API_KEY = 'YOUR_API_KEY_HERE'; // Replace this with your actual API key
+const MAX_RESULTS = 10;
+
+const searchInput = document.getElementById('searchInput');
+const searchButton = document.getElementById('searchButton');
+const searchResults = document.getElementById('searchResults');
+
+// YouTube search function
+async function searchYouTube(query) {
+    if (!query.trim()) {
+        return;
+    }
+
+    // Check if API key is set
+    if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY === 'YOUR_API_KEY_HERE') {
+        searchResults.innerHTML = '<div class="error">⚠️ YouTube API key not configured. Please add your YouTube Data API v3 key in app.js.</div>';
+        return;
+    }
+
+    // Show loading state
+    searchResults.innerHTML = '<div class="loading">Searching YouTube...</div>';
+
+    try {
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&maxResults=${MAX_RESULTS}&type=video&key=${YOUTUBE_API_KEY}`;
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.items && data.items.length > 0) {
+            displayResults(data.items);
+            // Cache results with query-specific key
+            const cacheKey = `youtubeSearchCache_${encodeURIComponent(query)}`;
+            localStorage.setItem(cacheKey, JSON.stringify({
+                query: query,
+                results: data.items,
+                timestamp: new Date().toISOString()
+            }));
+        } else {
+            searchResults.innerHTML = '<div class="no-results">No videos found. Try a different search term.</div>';
+        }
+    } catch (error) {
+        console.error('YouTube search error:', error);
+        
+        // Try to load from cache if available for this specific query
+        const cacheKey = `youtubeSearchCache_${encodeURIComponent(query)}`;
+        try {
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const cacheData = JSON.parse(cached);
+                if (cacheData.query === query) {
+                    searchResults.innerHTML = '<div class="error">⚠️ Unable to fetch new results. Showing cached results.</div>';
+                    setTimeout(() => {
+                        displayResults(cacheData.results);
+                    }, 1000);
+                    return;
+                }
+            }
+        } catch (parseError) {
+            console.error('Error parsing cached data:', parseError);
+            // Clear corrupted cache
+            localStorage.removeItem(cacheKey);
+        }
+        
+        searchResults.innerHTML = '<div class="error">⚠️ Error searching YouTube. Please check your API key and connection, then try again.</div>';
+    }
+}
+
+// Display search results
+function displayResults(items) {
+    searchResults.innerHTML = '';
+    
+    items.forEach(item => {
+        const videoId = item.id.videoId;
+        const title = item.snippet.title;
+        const channelTitle = item.snippet.channelTitle;
+        const thumbnail = item.snippet.thumbnails.medium.url;
+        const publishedAt = new Date(item.snippet.publishedAt).toLocaleDateString();
+        
+        const videoItem = document.createElement('div');
+        videoItem.className = 'video-item';
+        videoItem.onclick = () => openVideo(videoId);
+        
+        videoItem.innerHTML = `
+            <img src="${thumbnail}" alt="${title}" class="video-thumbnail">
+            <div class="video-details">
+                <div class="video-title">${title}</div>
+                <div class="video-channel">${channelTitle}</div>
+                <div class="video-meta">Published: ${publishedAt}</div>
+            </div>
+        `;
+        
+        searchResults.appendChild(videoItem);
+    });
+}
+
+// Open video in YouTube
+function openVideo(videoId) {
+    const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    window.open(youtubeUrl, '_blank');
+}
+
+// Event listeners for YouTube search
+if (searchButton && searchInput) {
+    searchButton.addEventListener('click', () => {
+        const query = searchInput.value;
+        searchYouTube(query);
+    });
+
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const query = searchInput.value;
+            searchYouTube(query);
+        }
+    });
+}
