@@ -137,7 +137,9 @@ if ('serviceWorker' in navigator) {
 }
 
 // YouTube Search Functionality
-const YOUTUBE_API_KEY = 'AIzaSyDXBo9T8MgZqL9xGHcD5YqN7vR8wP4sKuI'; // Demo key - replace with your own
+// IMPORTANT: Replace with your own YouTube Data API v3 key
+// Get one from: https://console.cloud.google.com/apis/credentials
+const YOUTUBE_API_KEY = 'YOUR_API_KEY_HERE'; // Replace this with your actual API key
 const MAX_RESULTS = 10;
 
 const searchInput = document.getElementById('searchInput');
@@ -147,6 +149,12 @@ const searchResults = document.getElementById('searchResults');
 // YouTube search function
 async function searchYouTube(query) {
     if (!query.trim()) {
+        return;
+    }
+
+    // Check if API key is set
+    if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY === 'YOUR_API_KEY_HERE') {
+        searchResults.innerHTML = '<div class="error">⚠️ YouTube API key not configured. Please add your YouTube Data API v3 key in app.js.</div>';
         return;
     }
 
@@ -187,7 +195,7 @@ async function searchYouTube(query) {
                 displayResults(cacheData.results);
             }, 1000);
         } else {
-            searchResults.innerHTML = '<div class="error">⚠️ Error searching YouTube. Please check your connection and try again.</div>';
+            searchResults.innerHTML = '<div class="error">⚠️ Error searching YouTube. Please check your API key and connection, then try again.</div>';
         }
     }
 }
