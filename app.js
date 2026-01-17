@@ -139,6 +139,8 @@ if ('serviceWorker' in navigator) {
 // YouTube Search Functionality
 // IMPORTANT: Replace with your own YouTube Data API v3 key
 // Get one from: https://console.cloud.google.com/apis/credentials
+// NOTE: Client-side API keys are visible to users. For production apps,
+// consider implementing a backend proxy to hide the API key.
 const YOUTUBE_API_KEY = 'YOUR_API_KEY_HERE'; // Replace this with your actual API key
 const MAX_RESULTS = 10;
 
@@ -174,8 +176,9 @@ async function searchYouTube(query) {
         
         if (data.items && data.items.length > 0) {
             displayResults(data.items);
-            // Cache results
-            localStorage.setItem('youtubeSearchCache', JSON.stringify({
+            // Cache results with query-specific key
+            const cacheKey = `youtubeSearchCache_${encodeURIComponent(query)}`;
+            localStorage.setItem(cacheKey, JSON.stringify({
                 query: query,
                 results: data.items,
                 timestamp: new Date().toISOString()
@@ -186,17 +189,27 @@ async function searchYouTube(query) {
     } catch (error) {
         console.error('YouTube search error:', error);
         
-        // Try to load from cache if available
-        const cached = localStorage.getItem('youtubeSearchCache');
-        if (cached) {
-            const cacheData = JSON.parse(cached);
-            searchResults.innerHTML = '<div class="error">⚠️ Unable to fetch new results. Showing cached results.</div>';
-            setTimeout(() => {
-                displayResults(cacheData.results);
-            }, 1000);
-        } else {
-            searchResults.innerHTML = '<div class="error">⚠️ Error searching YouTube. Please check your API key and connection, then try again.</div>';
+        // Try to load from cache if available for this specific query
+        const cacheKey = `youtubeSearchCache_${encodeURIComponent(query)}`;
+        try {
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const cacheData = JSON.parse(cached);
+                if (cacheData.query === query) {
+                    searchResults.innerHTML = '<div class="error">⚠️ Unable to fetch new results. Showing cached results.</div>';
+                    setTimeout(() => {
+                        displayResults(cacheData.results);
+                    }, 1000);
+                    return;
+                }
+            }
+        } catch (parseError) {
+            console.error('Error parsing cached data:', parseError);
+            // Clear corrupted cache
+            localStorage.removeItem(cacheKey);
         }
+        
+        searchResults.innerHTML = '<div class="error">⚠️ Error searching YouTube. Please check your API key and connection, then try again.</div>';
     }
 }
 
