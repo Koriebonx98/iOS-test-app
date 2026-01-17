@@ -240,15 +240,6 @@ footer {
     .search-button {
         width: 100%;
     }
-
-    .video-thumbnail {
-        width: 100px;
-        height: 75px;
-    }
-
-    .video-title {
-        font-size: 0.9rem;
-    }
 }
 
 /* Dark mode support */
