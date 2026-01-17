@@ -3,9 +3,24 @@ let clickCount = 0;
 const actionButton = document.getElementById('actionButton');
 const clickCountDisplay = document.getElementById('clickCount');
 
+// Load click count from localStorage
+function loadClickCount() {
+    const savedCount = localStorage.getItem('clickCount');
+    if (savedCount) {
+        clickCount = parseInt(savedCount, 10);
+        clickCountDisplay.textContent = `Clicks: ${clickCount}`;
+    }
+}
+
+// Save click count to localStorage
+function saveClickCount() {
+    localStorage.setItem('clickCount', clickCount);
+}
+
 actionButton.addEventListener('click', () => {
     clickCount++;
     clickCountDisplay.textContent = `Clicks: ${clickCount}`;
+    saveClickCount();
     
     // Add a little animation feedback
     actionButton.style.transform = 'scale(0.95)';
@@ -25,8 +40,27 @@ function updateDeviceInfo() {
     const screenSize = document.getElementById('screenSize');
     const currentTime = document.getElementById('currentTime');
     
-    userAgent.textContent = navigator.userAgent;
-    screenSize.textContent = `${window.innerWidth} x ${window.innerHeight}px`;
+    // Load from localStorage if offline
+    if (!navigator.onLine) {
+        const savedDeviceInfo = localStorage.getItem('deviceInfo');
+        if (savedDeviceInfo) {
+            const deviceInfo = JSON.parse(savedDeviceInfo);
+            userAgent.textContent = deviceInfo.userAgent || navigator.userAgent;
+            screenSize.textContent = deviceInfo.screenSize || `${window.innerWidth} x ${window.innerHeight}px`;
+            console.log('[App] Using cached device info (offline mode)');
+        }
+    } else {
+        userAgent.textContent = navigator.userAgent;
+        screenSize.textContent = `${window.innerWidth} x ${window.innerHeight}px`;
+        
+        // Save device info to localStorage
+        const deviceInfo = {
+            userAgent: navigator.userAgent,
+            screenSize: `${window.innerWidth} x ${window.innerHeight}px`,
+            lastUpdated: new Date().toISOString()
+        };
+        localStorage.setItem('deviceInfo', JSON.stringify(deviceInfo));
+    }
     
     // Update time
     function updateTime() {
@@ -41,12 +75,46 @@ function updateDeviceInfo() {
 // Update screen size on orientation change
 window.addEventListener('resize', () => {
     const screenSize = document.getElementById('screenSize');
-    screenSize.textContent = `${window.innerWidth} x ${window.innerHeight}px`;
+    const newSize = `${window.innerWidth} x ${window.innerHeight}px`;
+    screenSize.textContent = newSize;
+    
+    // Update localStorage with new screen size
+    if (navigator.onLine) {
+        const deviceInfo = JSON.parse(localStorage.getItem('deviceInfo')) || {};
+        deviceInfo.screenSize = newSize;
+        deviceInfo.lastUpdated = new Date().toISOString();
+        localStorage.setItem('deviceInfo', JSON.stringify(deviceInfo));
+    }
 });
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Load saved click count
+    loadClickCount();
+    
+    // Update device info
     updateDeviceInfo();
+    
+    // Check online/offline status
+    function updateOnlineStatus() {
+        if (navigator.onLine) {
+            console.log('[App] Online - Using live data');
+        } else {
+            console.log('[App] Offline - Using cached data from localStorage');
+        }
+    }
+    
+    // Listen for online/offline events
+    window.addEventListener('online', () => {
+        console.log('[App] Connection restored');
+        updateDeviceInfo();
+    });
+    
+    window.addEventListener('offline', () => {
+        console.log('[App] Connection lost - Switching to offline mode');
+    });
+    
+    updateOnlineStatus();
     
     // Log to console that app is ready
     console.log('iOS Test App loaded successfully!');
@@ -59,12 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: false });
 });
 
-// Service Worker registration for PWA capabilities (optional)
+// Service Worker registration for PWA capabilities
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        // Uncomment to enable service worker
-        // navigator.serviceWorker.register('/service-worker.js')
-        //     .then(reg => console.log('Service Worker registered', reg))
-        //     .catch(err => console.log('Service Worker registration failed', err));
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('[Service Worker] Registered successfully', reg))
+            .catch(err => console.log('[Service Worker] Registration failed', err));
     });
 }
