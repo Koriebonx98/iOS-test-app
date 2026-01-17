@@ -8,31 +8,11 @@ Test web app for iOS with YouTube search functionality.
 - 🎨 Modern, clean interface  
 - ⚡ Fast and lightweight
 - ✨ iOS optimized
-- 🔍 YouTube video search functionality
+- 🔍 YouTube video search (redirects to YouTube search results)
 
 ## Setup Instructions
 
-### YouTube Search API Configuration
-
-To enable the YouTube search functionality:
-
-1. **Get a YouTube Data API v3 key:**
-   - Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a new project or select an existing one
-   - Enable the YouTube Data API v3
-   - Create credentials (API key)
-   - Copy your API key
-
-2. **Add your API key to the app:**
-   - Open `app.js`
-   - Find the line: `const YOUTUBE_API_KEY = 'YOUR_API_KEY_HERE';`
-   - Replace `'YOUR_API_KEY_HERE'` with your actual API key
-   - Save the file
-
-3. **Test the functionality:**
-   - Open `index.html` in a web browser
-   - Use the YouTube search bar to search for videos
-   - Click on any result to open it in YouTube
+No setup required! Just open `index.html` in a web browser or deploy to GitHub Pages.
 
 ## Local Development
 
@@ -63,11 +43,10 @@ This app is designed to work with GitHub Pages:
 ## Features Detail
 
 ### YouTube Search
-- Search for YouTube videos by keyword
-- View video thumbnails, titles, channels, and publish dates
-- Click results to open videos in YouTube
-- Cached results for offline viewing
-- Responsive design for mobile and desktop
+- Simple search bar that redirects to YouTube search results
+- Opens results in a new tab, just like YouTube's search
+- No API key required - works immediately
+- Supports keyboard Enter key for quick searches
 
 ### Interactive Counter
 - Click tracking with localStorage persistence
@@ -82,10 +61,4 @@ This app is designed to work with GitHub Pages:
 - iOS Safari (optimized)
 - Chrome/Edge
 - Firefox
-- Any modern web browser with ES6+ support
-
-## Security Notes
-
-- **Never commit your actual API key to public repositories**
-- Consider using environment variables for production deployments
-- The YouTube Data API key should be restricted to your domain in Google Cloud Console 
+- Any modern web browser 
