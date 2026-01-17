@@ -1,0 +1,19 @@
+# Configuration file with API keys (keep this private!)
+config.js
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/

@@ -195,6 +195,13 @@ footer {
     background: var(--secondary-color);
 }
 
+.search-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 10px;
+    text-align: center;
+}
+
 .search-results {
     display: grid;
     gap: 15px;
