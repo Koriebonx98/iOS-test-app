@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="iOS Test App">
+    <title>iOS Test App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 iOS Test App</h1>
+            <p class="subtitle">A simple web app for iOS</p>
+        </header>
+
+        <main>
+            <section class="card">
+                <h2>Welcome!</h2>
+                <p>This is a web-based application designed to work seamlessly on iOS devices.</p>
+            </section>
+
+            <section class="card">
+                <h2>Features</h2>
+                <ul class="feature-list">
+                    <li>📱 Mobile-first responsive design</li>
+                    <li>🎨 Modern, clean interface</li>
+                    <li>⚡ Fast and lightweight</li>
+                    <li>✨ iOS optimized</li>
+                </ul>
+            </section>
+
+            <section class="card interactive">
+                <h2>Try It Out</h2>
+                <p>Tap the button below:</p>
+                <button id="actionButton" class="action-button">Click Me!</button>
+                <p id="clickCount" class="click-count">Clicks: 0</p>
+            </section>
+
+            <section class="card">
+                <h2>Device Info</h2>
+                <div id="deviceInfo" class="device-info">
+                    <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+                    <p><strong>Screen Size:</strong> <span id="screenSize"></span></p>
+                    <p><strong>Time:</strong> <span id="currentTime"></span></p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 iOS Test App</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
