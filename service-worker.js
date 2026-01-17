@@ -1,10 +1,10 @@
 const CACHE_NAME = 'ios-test-app-cache-v1';
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/styles.css',
-    '/app.js',
-    '/manifest.json'
+    './',
+    './index.html',
+    './styles.css',
+    './app.js',
+    './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
