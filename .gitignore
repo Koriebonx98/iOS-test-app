@@ -1,6 +1,3 @@
-# Configuration file with API keys (keep this private!)
-config.js
-
 # System files
 .DS_Store
 Thumbs.db
