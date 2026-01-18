@@ -463,6 +463,9 @@ function updatePlaylist() {
         
         playlist.appendChild(li);
     });
+    
+    // Update save button state whenever playlist changes
+    updateSaveButtonState();
 }
 
 // Event delegation for playlist items
@@ -786,14 +789,19 @@ function showNotification(message, type = 'success') {
     }
 }
 
-// Get current playlist data
+/**
+ * Get current playlist metadata for saving to localStorage.
+ * Note: Due to browser security restrictions, only metadata (file names, types, formats)
+ * can be saved. The actual file data, URLs, and File objects cannot be persisted.
+ * Users will need to re-add their media files after reloading the page.
+ * 
+ * @returns {Array} Array of playlist items with name, type, and format properties
+ */
 function getCurrentPlaylist() {
     return mediaPlaylist.map(media => ({
         name: media.name,
         type: media.type,
         format: media.format
-        // Note: We can't save the actual file URL or File object
-        // Those will need to be re-added by the user
     }));
 }
 
@@ -853,10 +861,3 @@ function updateSaveButtonState() {
         savePlaylistButton.disabled = mediaPlaylist.length === 0;
     }
 }
-
-// Update the existing updatePlaylist function to also update the save button state
-const originalUpdatePlaylist = updatePlaylist;
-updatePlaylist = function() {
-    originalUpdatePlaylist.call(this);
-    updateSaveButtonState();
-};
