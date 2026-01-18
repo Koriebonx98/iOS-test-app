@@ -116,6 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize About dropdown toggle
     initializeAboutDropdown();
     
+    // Load saved playlist
+    loadSavedPlaylist();
+    
     // Check online/offline status
     function updateOnlineStatus() {
         if (navigator.onLine) {
@@ -460,6 +463,9 @@ function updatePlaylist() {
         
         playlist.appendChild(li);
     });
+    
+    // Update save button state whenever playlist changes
+    updateSaveButtonState();
 }
 
 // Event delegation for playlist items
@@ -756,5 +762,115 @@ function resetAppData() {
             console.log('[Reset] IndexedDB.databases() not supported, skipping IndexedDB cleanup');
             location.reload();
         }
+    }
+}
+
+// Playlist Save/Load Functionality
+const savePlaylistButton = document.getElementById('savePlaylistButton');
+
+// Show notification message
+function showNotification(message, type = 'success') {
+    const notificationDiv = document.createElement('div');
+    notificationDiv.className = `notification-message ${type}`;
+    
+    // Add icon based on type
+    const icon = type === 'success' ? '✓' : 'ℹ';
+    notificationDiv.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span><span>${message}</span>`;
+    
+    const container = document.querySelector('.media-player-section');
+    if (container) {
+        container.insertBefore(notificationDiv, container.children[1]);
+        
+        // Remove notification message after 3 seconds
+        setTimeout(() => {
+            notificationDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notificationDiv.remove(), 300);
+        }, 3000);
+    }
+}
+
+/**
+ * Get current playlist metadata for saving to localStorage.
+ * Note: Due to browser security restrictions, only metadata (file names, types, formats)
+ * can be saved. The actual file data, URLs, and File objects cannot be persisted.
+ * Users will need to re-add their media files after reloading the page.
+ * 
+ * @returns {Array<{name: string, type: string, format: string}>} Array of playlist items with name, type, and format properties
+ */
+function getCurrentPlaylist() {
+    return mediaPlaylist.map(media => ({
+        name: media.name,
+        type: media.type,
+        format: media.format
+    }));
+}
+
+/**
+ * Save the current playlist to localStorage.
+ * Serializes playlist metadata (names, types, formats) along with a timestamp
+ * and stores it in localStorage for persistence across sessions.
+ * Shows a success notification when saved, or an info notification if playlist is empty.
+ */
+function savePlaylist() {
+    if (mediaPlaylist.length === 0) {
+        showNotification('No items in the playlist to save.', 'info');
+        return;
+    }
+
+    const playlist = getCurrentPlaylist();
+    const timestamp = new Date().toISOString();
+    const savedData = { playlist, timestamp };
+
+    localStorage.setItem('savedPlaylist', JSON.stringify(savedData));
+    showNotification('Playlist saved successfully!', 'success');
+    console.log('[Playlist] Saved playlist with', playlist.length, 'items');
+}
+
+/**
+ * Display saved playlist information.
+ * Shows a notification with the timestamp when the playlist was last saved.
+ * 
+ * @param {Array<{name: string, type: string, format: string}>} playlistData - The playlist data to display
+ * @param {string} timestamp - ISO 8601 timestamp when the playlist was saved
+ */
+function displayPlaylist(playlistData, timestamp) {
+    if (!playlistData || playlistData.length === 0) return;
+
+    // Show notification about the saved playlist
+    const date = new Date(timestamp);
+    const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    showNotification(`Playlist loaded from last session (${formattedDate})`, 'info');
+    console.log('[Playlist] Found saved playlist with', playlistData.length, 'items');
+    console.log('[Playlist] Note: Files need to be re-added by the user');
+}
+
+/**
+ * Load saved playlist from localStorage on page load.
+ * Parses the saved data and displays notification if a playlist is found.
+ */
+function loadSavedPlaylist() {
+    const savedData = localStorage.getItem('savedPlaylist');
+    if (savedData) {
+        try {
+            const { playlist, timestamp } = JSON.parse(savedData);
+            displayPlaylist(playlist, timestamp);
+        } catch (error) {
+            console.error('[Playlist] Error loading saved playlist:', error);
+        }
+    }
+}
+
+// Bind save button event
+if (savePlaylistButton) {
+    savePlaylistButton.addEventListener('click', savePlaylist);
+}
+
+/**
+ * Update the save button state based on current playlist contents.
+ * Enables the button when playlist has items, disables it when empty.
+ */
+function updateSaveButtonState() {
+    if (savePlaylistButton) {
+        savePlaylistButton.disabled = mediaPlaylist.length === 0;
     }
 }
