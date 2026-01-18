@@ -202,6 +202,113 @@ footer {
     text-align: center;
 }
 
+/* Dropdown About Section Styles */
+.dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dropdown-header:hover {
+    opacity: 0.8;
+}
+
+.dropdown-arrow {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+    color: var(--primary-color);
+}
+
+.dropdown-header.active .dropdown-arrow {
+    transform: rotate(-180deg);
+}
+
+.dropdown-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    opacity: 0;
+}
+
+.dropdown-content.active {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: 15px;
+}
+
+/* Socials Section Styles */
+.socials-section {
+    background: linear-gradient(135deg, var(--card-background), var(--background-color));
+}
+
+.socials-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.social-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 15px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.social-link:hover,
+.social-link:focus {
+    transform: translateY(-5px);
+    background: var(--card-background);
+    box-shadow: var(--shadow);
+}
+
+.social-link:active {
+    transform: scale(0.95);
+}
+
+.social-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--primary-color);
+    transition: color 0.2s ease;
+}
+
+.social-link:nth-child(1) .social-icon {
+    color: #FFFC00;
+}
+
+.social-link:nth-child(2) .social-icon {
+    color: #000000;
+}
+
+.social-link:nth-child(3) .social-icon {
+    color: #FF5500;
+}
+
+@media (prefers-color-scheme: dark) {
+    .social-link:nth-child(2) .social-icon {
+        color: #FFFFFF;
+    }
+}
+
+.social-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
 /* iOS specific enhancements */
 @supports (-webkit-touch-callout: none) {
     body {
