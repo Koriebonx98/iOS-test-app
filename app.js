@@ -564,3 +564,35 @@ if (videoPlayer) {
         }
     });
 }
+
+// Reset App Data Functionality
+function resetAppData() {
+    if (confirm('Are you sure you want to reset app data? This will clear all stored data and reload the page.')) {
+        // Clear localStorage and sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Optionally delete IndexedDB databases
+        if (window.indexedDB) {
+            indexedDB.databases().then((databases) => {
+                databases.forEach((db) => {
+                    indexedDB.deleteDatabase(db.name);
+                    console.log(`[Reset] Deleted IndexedDB database: ${db.name}`);
+                });
+            }).catch((err) => {
+                console.warn('[Reset] Could not enumerate IndexedDB databases:', err);
+            });
+        }
+
+        console.log('[Reset] App data cleared');
+        
+        // Reload the page to fetch newest data
+        location.reload();
+    }
+}
+
+// Reset Data button event listener
+const resetDataButton = document.getElementById('resetDataButton');
+if (resetDataButton) {
+    resetDataButton.addEventListener('click', resetAppData);
+}
