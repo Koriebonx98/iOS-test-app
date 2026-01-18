@@ -137,6 +137,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     updateOnlineStatus();
     
+    // Initialize Reset Data button
+    const resetDataButton = document.getElementById('resetDataButton');
+    if (resetDataButton) {
+        resetDataButton.addEventListener('click', resetAppData);
+    }
+    
     // Log to console that app is ready
     console.log('iOS Test App loaded successfully!');
     
@@ -563,4 +569,35 @@ if (videoPlayer) {
             playMedia();
         }
     });
+}
+
+// Reset App Data Functionality
+function resetAppData() {
+    if (confirm('Are you sure you want to reset app data? This will clear all stored data and reload the page.')) {
+        // Clear localStorage and sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        console.log('[Reset] App data cleared');
+
+        // Optionally delete IndexedDB databases
+        if (window.indexedDB && typeof window.indexedDB.databases === 'function') {
+            window.indexedDB.databases().then((databases) => {
+                const deletionPromises = databases.map((db) => {
+                    console.log(`[Reset] Deleting IndexedDB database: ${db.name}`);
+                    return indexedDB.deleteDatabase(db.name);
+                });
+                return Promise.all(deletionPromises);
+            }).catch((err) => {
+                console.warn('[Reset] Could not enumerate or delete IndexedDB databases:', err);
+            }).finally(() => {
+                // Reload the page to fetch newest data
+                location.reload();
+            });
+        } else {
+            // Reload the page immediately if IndexedDB is not available or databases() is not supported
+            console.log('[Reset] IndexedDB.databases() not supported, skipping IndexedDB cleanup');
+            location.reload();
+        }
+    }
 }
