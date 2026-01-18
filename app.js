@@ -87,6 +87,24 @@ window.addEventListener('resize', () => {
     }
 });
 
+// About dropdown toggle functionality
+function initializeAboutDropdown() {
+    const aboutToggle = document.getElementById('aboutToggle');
+    const aboutContent = document.getElementById('aboutContent');
+    
+    if (aboutToggle && aboutContent) {
+        aboutToggle.addEventListener('click', () => {
+            aboutToggle.classList.toggle('active');
+            aboutContent.classList.toggle('active');
+            
+            // Optional: Haptic feedback for supported devices (primarily Android)
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(10);
+            }
+        });
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     // Load saved click count
@@ -94,6 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Update device info
     updateDeviceInfo();
+    
+    // Initialize About dropdown toggle
+    initializeAboutDropdown();
     
     // Check online/offline status
     function updateOnlineStatus() {
