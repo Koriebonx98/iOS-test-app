@@ -199,6 +199,134 @@ let mediaPlaylist = [];
 let currentMediaIndex = -1;
 let isPlaying = false;
 
+// Comprehensive format support definitions
+const SUPPORTED_FORMATS = {
+    audio: {
+        // Common audio formats with MIME types
+        'mp3': ['audio/mpeg', 'audio/mp3'],
+        'wav': ['audio/wav', 'audio/wave', 'audio/x-wav'],
+        'ogg': ['audio/ogg', 'application/ogg'],
+        'aac': ['audio/aac', 'audio/x-aac'],
+        'flac': ['audio/flac', 'audio/x-flac'],
+        'm4a': ['audio/mp4', 'audio/x-m4a'],
+        'weba': ['audio/webm'],
+        'opus': ['audio/opus'],
+        'oga': ['audio/ogg'],
+        'webm': ['audio/webm']
+    },
+    video: {
+        // Common video formats with MIME types
+        'mp4': ['video/mp4'],
+        'webm': ['video/webm'],
+        'ogg': ['video/ogg'],
+        'ogv': ['video/ogg'],
+        'avi': ['video/x-msvideo', 'video/avi'],
+        'mkv': ['video/x-matroska'],
+        'mov': ['video/quicktime'],
+        'wmv': ['video/x-ms-wmv'],
+        'flv': ['video/x-flv'],
+        'm4v': ['video/x-m4v'],
+        'mpeg': ['video/mpeg'],
+        'mpg': ['video/mpeg'],
+        '3gp': ['video/3gpp']
+    }
+};
+
+// Get file extension from filename
+function getFileExtension(filename) {
+    const parts = filename.split('.');
+    return parts.length > 1 ? parts.pop().toLowerCase() : '';
+}
+
+// Determine media type from file extension and MIME type
+function getMediaType(file) {
+    const extension = getFileExtension(file.name);
+    const mimeType = file.type.toLowerCase();
+    
+    // Check by MIME type first
+    if (mimeType.startsWith('audio/')) {
+        return 'audio';
+    }
+    if (mimeType.startsWith('video/')) {
+        return 'video';
+    }
+    
+    // Check by extension
+    for (const [ext, mimes] of Object.entries(SUPPORTED_FORMATS.audio)) {
+        if (extension === ext || mimes.includes(mimeType)) {
+            return 'audio';
+        }
+    }
+    
+    for (const [ext, mimes] of Object.entries(SUPPORTED_FORMATS.video)) {
+        if (extension === ext || mimes.includes(mimeType)) {
+            return 'video';
+        }
+    }
+    
+    return null;
+}
+
+// Check if format is supported
+function isFormatSupported(file) {
+    const extension = getFileExtension(file.name);
+    const mimeType = file.type.toLowerCase();
+    
+    // Check audio formats
+    for (const [ext, mimes] of Object.entries(SUPPORTED_FORMATS.audio)) {
+        if (extension === ext || mimes.includes(mimeType)) {
+            return { supported: true, type: 'audio', format: extension ? extension.toUpperCase() : 'AUDIO' };
+        }
+    }
+    
+    // Fallback check for generic audio MIME types not in our list
+    if (mimeType.startsWith('audio/') && !extension) {
+        return { supported: true, type: 'audio', format: 'AUDIO' };
+    }
+    
+    // Check video formats
+    for (const [ext, mimes] of Object.entries(SUPPORTED_FORMATS.video)) {
+        if (extension === ext || mimes.includes(mimeType)) {
+            return { supported: true, type: 'video', format: extension ? extension.toUpperCase() : 'VIDEO' };
+        }
+    }
+    
+    // Fallback check for generic video MIME types not in our list
+    if (mimeType.startsWith('video/') && !extension) {
+        return { supported: true, type: 'video', format: 'VIDEO' };
+    }
+    
+    return { supported: false, type: null, format: extension ? extension.toUpperCase() : 'UNKNOWN' };
+}
+
+// Show error message to user
+function showMediaError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'media-error-message';
+    errorDiv.textContent = message;
+    errorDiv.style.cssText = `
+        background: #FF3B30;
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+        text-align: center;
+        font-weight: 500;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    const container = document.querySelector('.media-player-section');
+    if (container) {
+        container.insertBefore(errorDiv, container.children[1]);
+        
+        // Remove error message after 5 seconds
+        setTimeout(() => {
+            errorDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => errorDiv.remove(), 300);
+        }, 5000);
+    }
+}
+
 // Get media player elements
 const appStoreButton = document.getElementById('appStoreButton');
 const mediaPlayerButton = document.getElementById('mediaPlayerButton');
@@ -245,28 +373,45 @@ if (closeMediaPlayer) {
 if (mediaFileInput) {
     mediaFileInput.addEventListener('change', (e) => {
         const files = Array.from(e.target.files);
+        let addedFiles = 0;
+        let unsupportedFiles = [];
         
         files.forEach(file => {
-            const fileType = file.type.startsWith('audio/') ? 'audio' : 
-                           file.type.startsWith('video/') ? 'video' : null;
+            const formatInfo = isFormatSupported(file);
             
-            if (fileType) {
+            if (formatInfo.supported) {
                 const fileURL = URL.createObjectURL(file);
                 mediaPlaylist.push({
                     name: file.name,
-                    type: fileType,
+                    type: formatInfo.type,
+                    format: formatInfo.format,
                     url: fileURL,
                     file: file
+                });
+                addedFiles++;
+            } else {
+                unsupportedFiles.push({
+                    name: file.name,
+                    format: formatInfo.format
                 });
             }
         });
         
-        updatePlaylist();
-        enableControls();
+        // Show error for unsupported files
+        if (unsupportedFiles.length > 0) {
+            const fileList = unsupportedFiles.map(f => `${f.name} (${f.format})`).join(', ');
+            showMediaError(`⚠️ Unsupported format: ${fileList}. Please use common audio/video formats (MP3, MP4, WAV, WebM, OGG, etc.)`);
+        }
         
-        // Auto-play first file if nothing is playing
-        if (currentMediaIndex === -1 && mediaPlaylist.length > 0) {
-            loadMedia(0);
+        // Show success message if files were added
+        if (addedFiles > 0) {
+            updatePlaylist();
+            enableControls();
+            
+            // Auto-play first file if nothing is playing
+            if (currentMediaIndex === -1 && mediaPlaylist.length > 0) {
+                loadMedia(0);
+            }
         }
         
         // Clear the input so the same file can be added again if needed
@@ -301,7 +446,7 @@ function updatePlaylist() {
         
         const itemType = document.createElement('div');
         itemType.className = 'playlist-item-type';
-        itemType.textContent = media.type.toUpperCase();
+        itemType.textContent = `${media.type.toUpperCase()} • ${media.format}`;
         
         itemInfo.appendChild(itemName);
         itemInfo.appendChild(itemType);
@@ -377,10 +522,22 @@ function loadMedia(index) {
         audioPlayer.src = media.url;
         audioPlayer.style.display = 'block';
         audioPlayer.load();
+        
+        // Add error handler
+        audioPlayer.onerror = function() {
+            showMediaError(`❌ Failed to load ${media.name}. The file format may not be supported by your browser.`);
+            console.error(`Audio load error for ${media.name}:`, audioPlayer.error);
+        };
     } else if (media.type === 'video') {
         videoPlayer.src = media.url;
         videoPlayer.style.display = 'block';
         videoPlayer.load();
+        
+        // Add error handler
+        videoPlayer.onerror = function() {
+            showMediaError(`❌ Failed to load ${media.name}. The file format may not be supported by your browser.`);
+            console.error(`Video load error for ${media.name}:`, videoPlayer.error);
+        };
     }
     
     updatePlaylist();
@@ -400,7 +557,7 @@ function updateCurrentMediaDisplay(media = null) {
     currentMediaDisplay.innerHTML = `
         <div class="current-media-info">
             <div class="media-title">${media.name}</div>
-            <div class="media-type">${media.type.toUpperCase()}</div>
+            <div class="media-type">${media.type.toUpperCase()} • ${media.format}</div>
         </div>
     `;
 }

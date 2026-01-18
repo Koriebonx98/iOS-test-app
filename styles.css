@@ -683,6 +683,29 @@ footer {
     }
 }
 
+/* Media error message animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
 /* Responsive design */
 @media (max-width: 600px) {
     .container {

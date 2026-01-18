@@ -9,6 +9,16 @@ Test web app for iOS with YouTube search functionality.
 - ⚡ Fast and lightweight
 - ✨ iOS optimized
 - 🔍 YouTube video search (redirects to YouTube search results)
+- 🎵 **Enhanced Media Player** with comprehensive format support:
+  - **Audio formats:** MP3, WAV, OGG, AAC, FLAC, M4A, WebM Audio, Opus, and more
+  - **Video formats:** MP4, WebM, OGG, AVI, MKV, MOV, WMV, FLV, MPEG, 3GP, and more
+  - Automatic format detection and validation
+  - Dynamic switching between audio and video players
+  - File format indicators in playlist
+  - User-friendly error handling for unsupported formats
+  - Full playback controls (Play, Pause, Stop, Next, Previous)
+  - Progress bar with time display
+  - Playlist management with visual indicators
 
 ## Setup Instructions
 
@@ -51,6 +61,16 @@ This app is designed to work with GitHub Pages:
 ### Interactive Counter
 - Click tracking with localStorage persistence
 - Haptic feedback on iOS devices
+
+### Media Player
+- Supports all common audio formats: MP3, WAV, OGG, AAC, FLAC, M4A, Opus, WebM Audio
+- Supports all common video formats: MP4, WebM, OGG, AVI, MKV, MOV, WMV, FLV, MPEG, 3GP
+- Automatic format detection and MIME type validation
+- Dynamic player switching (audio/video based on file type)
+- Playlist with file format indicators (e.g., "AUDIO • MP3", "VIDEO • MP4")
+- Comprehensive error handling with user-friendly messages
+- Full playback controls and progress tracking
+- Cross-browser compatible (Chrome, Firefox, Safari, Edge)
 
 ### Device Information
 - Real-time display of user agent, screen size, and time
