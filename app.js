@@ -581,8 +581,8 @@ function resetAppData() {
         console.log('[Reset] App data cleared');
 
         // Optionally delete IndexedDB databases
-        if (window.indexedDB && typeof indexedDB.databases === 'function') {
-            indexedDB.databases().then((databases) => {
+        if (window.indexedDB && typeof window.indexedDB.databases === 'function') {
+            window.indexedDB.databases().then((databases) => {
                 const deletionPromises = databases.map((db) => {
                     console.log(`[Reset] Deleting IndexedDB database: ${db.name}`);
                     return indexedDB.deleteDatabase(db.name);
