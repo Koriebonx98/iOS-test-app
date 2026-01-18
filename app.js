@@ -511,10 +511,12 @@ if (progressBar) {
 // Update progress bar and time display
 function updateProgress() {
     const player = getActivePlayer();
-    if (!player || !player.duration) return;
+    if (!player || !player.duration || isNaN(player.duration) || !isFinite(player.duration)) return;
     
     const progress = (player.currentTime / player.duration) * 100;
-    progressBar.value = progress;
+    if (isFinite(progress)) {
+        progressBar.value = progress;
+    }
     
     const currentTimeDisplay = document.getElementById('currentTime');
     const durationDisplay = document.getElementById('duration');
@@ -530,7 +532,7 @@ function updateProgress() {
 
 // Format time in MM:SS
 function formatTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
+    if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
     
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
