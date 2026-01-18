@@ -97,7 +97,7 @@ function initializeAboutDropdown() {
             aboutToggle.classList.toggle('active');
             aboutContent.classList.toggle('active');
             
-            // Optional: Haptic feedback for iOS devices
+            // Optional: Haptic feedback for supported devices (primarily Android)
             if (window.navigator && window.navigator.vibrate) {
                 window.navigator.vibrate(10);
             }
