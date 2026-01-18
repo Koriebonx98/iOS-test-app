@@ -805,7 +805,12 @@ function getCurrentPlaylist() {
     }));
 }
 
-// Save playlist to localStorage
+/**
+ * Save the current playlist to localStorage.
+ * Serializes playlist metadata (names, types, formats) along with a timestamp
+ * and stores it in localStorage for persistence across sessions.
+ * Shows a success notification when saved, or an info notification if playlist is empty.
+ */
 function savePlaylist() {
     if (mediaPlaylist.length === 0) {
         showNotification('No items in the playlist to save.', 'info');
@@ -860,7 +865,10 @@ if (savePlaylistButton) {
     savePlaylistButton.addEventListener('click', savePlaylist);
 }
 
-// Enable/disable save button based on playlist
+/**
+ * Update the save button state based on current playlist contents.
+ * Enables the button when playlist has items, disables it when empty.
+ */
 function updateSaveButtonState() {
     if (savePlaylistButton) {
         savePlaylistButton.disabled = mediaPlaylist.length === 0;
