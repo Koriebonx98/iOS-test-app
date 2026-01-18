@@ -78,6 +78,73 @@
             </section>
 
             <section class="card">
+                <h2>Quick Links</h2>
+                <div class="button-container">
+                    <button id="appStoreButton" class="quick-link-button">
+                        <span class="button-icon">🏪</span>
+                        <span>AppStore</span>
+                    </button>
+                    <button id="mediaPlayerButton" class="quick-link-button">
+                        <span class="button-icon">🎵</span>
+                        <span>Media Player</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="card media-player-section" id="mediaPlayerSection" style="display: none;">
+                <div class="media-player-header">
+                    <h2>🎵 Media Player</h2>
+                    <button id="closeMediaPlayer" class="close-button">✕</button>
+                </div>
+                
+                <div class="file-input-container">
+                    <label for="mediaFileInput" class="file-input-label">
+                        <span class="file-icon">📁</span>
+                        <span>Select Media Files</span>
+                    </label>
+                    <input type="file" id="mediaFileInput" accept="audio/*,video/*" multiple class="file-input">
+                </div>
+
+                <div class="current-media-display" id="currentMediaDisplay">
+                    <p class="no-media-text">No media loaded</p>
+                </div>
+
+                <div class="media-controls">
+                    <button id="prevButton" class="control-button" disabled>
+                        <span>⏮</span>
+                    </button>
+                    <button id="playButton" class="control-button primary" disabled>
+                        <span>▶</span>
+                    </button>
+                    <button id="pauseButton" class="control-button" disabled>
+                        <span>⏸</span>
+                    </button>
+                    <button id="stopButton" class="control-button" disabled>
+                        <span>⏹</span>
+                    </button>
+                    <button id="nextButton" class="control-button" disabled>
+                        <span>⏭</span>
+                    </button>
+                </div>
+
+                <div class="progress-container">
+                    <input type="range" id="progressBar" class="progress-bar" min="0" max="100" value="0" disabled>
+                    <div class="time-display">
+                        <span id="currentTime">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+
+                <div class="playlist-container" id="playlistContainer">
+                    <h3>Playlist</h3>
+                    <ul id="playlist" class="playlist"></ul>
+                </div>
+
+                <audio id="audioPlayer" style="display: none;"></audio>
+                <video id="videoPlayer" style="display: none;" controls></video>
+            </section>
+
+            <section class="card">
                 <h2>🔍 YouTube Search</h2>
                 <div class="youtube-search">
                     <p>Search YouTube videos directly:</p>
