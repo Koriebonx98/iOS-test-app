@@ -274,19 +274,29 @@ function isFormatSupported(file) {
     
     // Check audio formats
     for (const [ext, mimes] of Object.entries(SUPPORTED_FORMATS.audio)) {
-        if (extension === ext || mimes.includes(mimeType) || mimeType.startsWith('audio/')) {
-            return { supported: true, type: 'audio', format: extension.toUpperCase() || 'AUDIO' };
+        if (extension === ext || mimes.includes(mimeType)) {
+            return { supported: true, type: 'audio', format: extension ? extension.toUpperCase() : 'AUDIO' };
         }
+    }
+    
+    // Fallback check for generic audio MIME types not in our list
+    if (mimeType.startsWith('audio/') && !extension) {
+        return { supported: true, type: 'audio', format: 'AUDIO' };
     }
     
     // Check video formats
     for (const [ext, mimes] of Object.entries(SUPPORTED_FORMATS.video)) {
-        if (extension === ext || mimes.includes(mimeType) || mimeType.startsWith('video/')) {
-            return { supported: true, type: 'video', format: extension.toUpperCase() || 'VIDEO' };
+        if (extension === ext || mimes.includes(mimeType)) {
+            return { supported: true, type: 'video', format: extension ? extension.toUpperCase() : 'VIDEO' };
         }
     }
     
-    return { supported: false, type: null, format: extension.toUpperCase() || 'UNKNOWN' };
+    // Fallback check for generic video MIME types not in our list
+    if (mimeType.startsWith('video/') && !extension) {
+        return { supported: true, type: 'video', format: 'VIDEO' };
+    }
+    
+    return { supported: false, type: null, format: extension ? extension.toUpperCase() : 'UNKNOWN' };
 }
 
 // Show error message to user
