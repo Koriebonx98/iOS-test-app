@@ -281,6 +281,7 @@ function updatePlaylist() {
     mediaPlaylist.forEach((media, index) => {
         const li = document.createElement('li');
         li.className = 'playlist-item';
+        li.dataset.index = index;
         if (index === currentMediaIndex) {
             li.classList.add('active');
         }
@@ -302,19 +303,30 @@ function updatePlaylist() {
         const removeBtn = document.createElement('button');
         removeBtn.className = 'playlist-item-remove';
         removeBtn.textContent = '✕';
-        removeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            removeFromPlaylist(index);
-        });
         
         li.appendChild(itemInfo);
         li.appendChild(removeBtn);
         
-        li.addEventListener('click', () => {
-            loadMedia(index);
-        });
-        
         playlist.appendChild(li);
+    });
+}
+
+// Event delegation for playlist items
+if (playlist) {
+    playlist.addEventListener('click', (e) => {
+        const playlistItem = e.target.closest('.playlist-item');
+        if (!playlistItem) return;
+        
+        const index = parseInt(playlistItem.dataset.index, 10);
+        
+        // Check if remove button was clicked
+        if (e.target.classList.contains('playlist-item-remove')) {
+            e.stopPropagation();
+            removeFromPlaylist(index);
+        } else {
+            // Load the media
+            loadMedia(index);
+        }
     });
 }
 
@@ -487,10 +499,12 @@ if (prevButton) {
 if (progressBar) {
     progressBar.addEventListener('input', (e) => {
         const player = getActivePlayer();
-        if (!player) return;
+        if (!player || !player.duration || isNaN(player.duration) || !isFinite(player.duration)) return;
         
         const time = (player.duration * e.target.value) / 100;
-        player.currentTime = time;
+        if (isFinite(time)) {
+            player.currentTime = time;
+        }
     });
 }
 
