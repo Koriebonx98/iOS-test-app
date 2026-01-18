@@ -17,11 +17,21 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
-        })
-    );
+    // Handle navigation requests specially to avoid 404 errors
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            caches.match('index.html').then((response) => {
+                return response || fetch(event.request);
+            })
+        );
+    } else {
+        // For non-navigation requests, use normal cache-first strategy
+        event.respondWith(
+            caches.match(event.request).then((response) => {
+                return response || fetch(event.request);
+            })
+        );
+    }
 });
 
 self.addEventListener('activate', (event) => {
