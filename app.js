@@ -572,22 +572,26 @@ function resetAppData() {
         localStorage.clear();
         sessionStorage.clear();
 
+        console.log('[Reset] App data cleared');
+
         // Optionally delete IndexedDB databases
-        if (window.indexedDB) {
+        if (window.indexedDB && indexedDB.databases) {
             indexedDB.databases().then((databases) => {
-                databases.forEach((db) => {
-                    indexedDB.deleteDatabase(db.name);
-                    console.log(`[Reset] Deleted IndexedDB database: ${db.name}`);
+                const deletionPromises = databases.map((db) => {
+                    console.log(`[Reset] Deleting IndexedDB database: ${db.name}`);
+                    return indexedDB.deleteDatabase(db.name);
                 });
+                return Promise.all(deletionPromises);
             }).catch((err) => {
                 console.warn('[Reset] Could not enumerate IndexedDB databases:', err);
+            }).finally(() => {
+                // Reload the page to fetch newest data
+                location.reload();
             });
+        } else {
+            // Reload the page immediately if IndexedDB is not available or databases() is not supported
+            location.reload();
         }
-
-        console.log('[Reset] App data cleared');
-        
-        // Reload the page to fetch newest data
-        location.reload();
     }
 }
 
