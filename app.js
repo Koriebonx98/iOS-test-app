@@ -116,6 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize About dropdown toggle
     initializeAboutDropdown();
     
+    // Load saved playlist
+    loadSavedPlaylist();
+    
     // Check online/offline status
     function updateOnlineStatus() {
         if (navigator.onLine) {
@@ -758,3 +761,102 @@ function resetAppData() {
         }
     }
 }
+
+// Playlist Save/Load Functionality
+const savePlaylistButton = document.getElementById('savePlaylistButton');
+
+// Show notification message
+function showNotification(message, type = 'success') {
+    const notificationDiv = document.createElement('div');
+    notificationDiv.className = `notification-message ${type}`;
+    
+    // Add icon based on type
+    const icon = type === 'success' ? '✓' : 'ℹ';
+    notificationDiv.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span><span>${message}</span>`;
+    
+    const container = document.querySelector('.media-player-section');
+    if (container) {
+        container.insertBefore(notificationDiv, container.children[1]);
+        
+        // Remove notification message after 3 seconds
+        setTimeout(() => {
+            notificationDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notificationDiv.remove(), 300);
+        }, 3000);
+    }
+}
+
+// Get current playlist data
+function getCurrentPlaylist() {
+    return mediaPlaylist.map(media => ({
+        name: media.name,
+        type: media.type,
+        format: media.format
+        // Note: We can't save the actual file URL or File object
+        // Those will need to be re-added by the user
+    }));
+}
+
+// Save playlist to localStorage
+function savePlaylist() {
+    if (mediaPlaylist.length === 0) {
+        showNotification('No items in the playlist to save.', 'info');
+        return;
+    }
+
+    const playlist = getCurrentPlaylist();
+    const timestamp = new Date().toISOString();
+    const savedData = { playlist, timestamp };
+
+    localStorage.setItem('savedPlaylist', JSON.stringify(savedData));
+    showNotification('Playlist saved successfully!', 'success');
+    console.log('[Playlist] Saved playlist with', playlist.length, 'items');
+}
+
+// Display saved playlist info
+function displayPlaylist(playlistData) {
+    if (!playlistData || playlistData.length === 0) return;
+
+    // Show notification about the saved playlist
+    const savedData = localStorage.getItem('savedPlaylist');
+    if (savedData) {
+        const { timestamp } = JSON.parse(savedData);
+        const date = new Date(timestamp);
+        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        showNotification(`Playlist loaded from last session (${formattedDate})`, 'info');
+        console.log('[Playlist] Found saved playlist with', playlistData.length, 'items');
+        console.log('[Playlist] Note: Files need to be re-added by the user');
+    }
+}
+
+// Load saved playlist from localStorage
+function loadSavedPlaylist() {
+    const savedData = localStorage.getItem('savedPlaylist');
+    if (savedData) {
+        try {
+            const { playlist, timestamp } = JSON.parse(savedData);
+            displayPlaylist(playlist);
+        } catch (error) {
+            console.error('[Playlist] Error loading saved playlist:', error);
+        }
+    }
+}
+
+// Bind save button event
+if (savePlaylistButton) {
+    savePlaylistButton.addEventListener('click', savePlaylist);
+}
+
+// Enable/disable save button based on playlist
+function updateSaveButtonState() {
+    if (savePlaylistButton) {
+        savePlaylistButton.disabled = mediaPlaylist.length === 0;
+    }
+}
+
+// Update the existing updatePlaylist function to also update the save button state
+const originalUpdatePlaylist = updatePlaylist;
+updatePlaylist = function() {
+    originalUpdatePlaylist.call(this);
+    updateSaveButtonState();
+};

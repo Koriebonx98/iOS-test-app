@@ -593,10 +593,47 @@ footer {
     margin-top: 20px;
 }
 
+.playlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .playlist-container h3 {
     font-size: 1.2rem;
-    margin-bottom: 10px;
+    margin: 0;
     color: var(--text-color);
+}
+
+.save-playlist-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+}
+
+.save-playlist-button:hover:not(:disabled) {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.save-playlist-button:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.save-playlist-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 .playlist {
@@ -704,6 +741,30 @@ footer {
         opacity: 0;
         transform: translateY(-20px);
     }
+}
+
+/* Notification message styles */
+.notification-message {
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    text-align: center;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.notification-message.success {
+    background: #34C759;
+    color: white;
+}
+
+.notification-message.info {
+    background: var(--primary-color);
+    color: white;
 }
 
 /* Responsive design */
