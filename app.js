@@ -795,7 +795,7 @@ function showNotification(message, type = 'success') {
  * can be saved. The actual file data, URLs, and File objects cannot be persisted.
  * Users will need to re-add their media files after reloading the page.
  * 
- * @returns {Array} Array of playlist items with name, type, and format properties
+ * @returns {Array<{name: string, type: string, format: string}>} Array of playlist items with name, type, and format properties
  */
 function getCurrentPlaylist() {
     return mediaPlaylist.map(media => ({
@@ -821,29 +821,34 @@ function savePlaylist() {
     console.log('[Playlist] Saved playlist with', playlist.length, 'items');
 }
 
-// Display saved playlist info
-function displayPlaylist(playlistData) {
+/**
+ * Display saved playlist information.
+ * Shows a notification with the timestamp when the playlist was last saved.
+ * 
+ * @param {Array<{name: string, type: string, format: string}>} playlistData - The playlist data to display
+ * @param {string} timestamp - ISO 8601 timestamp when the playlist was saved
+ */
+function displayPlaylist(playlistData, timestamp) {
     if (!playlistData || playlistData.length === 0) return;
 
     // Show notification about the saved playlist
-    const savedData = localStorage.getItem('savedPlaylist');
-    if (savedData) {
-        const { timestamp } = JSON.parse(savedData);
-        const date = new Date(timestamp);
-        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-        showNotification(`Playlist loaded from last session (${formattedDate})`, 'info');
-        console.log('[Playlist] Found saved playlist with', playlistData.length, 'items');
-        console.log('[Playlist] Note: Files need to be re-added by the user');
-    }
+    const date = new Date(timestamp);
+    const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    showNotification(`Playlist loaded from last session (${formattedDate})`, 'info');
+    console.log('[Playlist] Found saved playlist with', playlistData.length, 'items');
+    console.log('[Playlist] Note: Files need to be re-added by the user');
 }
 
-// Load saved playlist from localStorage
+/**
+ * Load saved playlist from localStorage on page load.
+ * Parses the saved data and displays notification if a playlist is found.
+ */
 function loadSavedPlaylist() {
     const savedData = localStorage.getItem('savedPlaylist');
     if (savedData) {
         try {
             const { playlist, timestamp } = JSON.parse(savedData);
-            displayPlaylist(playlist);
+            displayPlaylist(playlist, timestamp);
         } catch (error) {
             console.error('[Playlist] Error loading saved playlist:', error);
         }
