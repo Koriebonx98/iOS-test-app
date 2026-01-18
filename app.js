@@ -137,6 +137,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     updateOnlineStatus();
     
+    // Initialize Reset Data button
+    const resetDataButton = document.getElementById('resetDataButton');
+    if (resetDataButton) {
+        resetDataButton.addEventListener('click', resetAppData);
+    }
+    
     // Log to console that app is ready
     console.log('iOS Test App loaded successfully!');
     
@@ -575,7 +581,7 @@ function resetAppData() {
         console.log('[Reset] App data cleared');
 
         // Optionally delete IndexedDB databases
-        if (window.indexedDB && indexedDB.databases) {
+        if (window.indexedDB && typeof indexedDB.databases === 'function') {
             indexedDB.databases().then((databases) => {
                 const deletionPromises = databases.map((db) => {
                     console.log(`[Reset] Deleting IndexedDB database: ${db.name}`);
@@ -583,20 +589,15 @@ function resetAppData() {
                 });
                 return Promise.all(deletionPromises);
             }).catch((err) => {
-                console.warn('[Reset] Could not enumerate IndexedDB databases:', err);
+                console.warn('[Reset] Could not enumerate or delete IndexedDB databases:', err);
             }).finally(() => {
                 // Reload the page to fetch newest data
                 location.reload();
             });
         } else {
             // Reload the page immediately if IndexedDB is not available or databases() is not supported
+            console.log('[Reset] IndexedDB.databases() not supported, skipping IndexedDB cleanup');
             location.reload();
         }
     }
-}
-
-// Reset Data button event listener
-const resetDataButton = document.getElementById('resetDataButton');
-if (resetDataButton) {
-    resetDataButton.addEventListener('click', resetAppData);
 }
