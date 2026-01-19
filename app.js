@@ -116,6 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize About dropdown toggle
     initializeAboutDropdown();
     
+    // Load and display version info
+    loadVersionInfo();
+    
     // Check online/offline status
     function updateOnlineStatus() {
         if (navigator.onLine) {
@@ -129,6 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('online', () => {
         console.log('[App] Connection restored');
         updateDeviceInfo();
+        // Check for updates when coming back online
+        checkForAppUpdates();
     });
     
     window.addEventListener('offline', () => {
@@ -143,6 +148,24 @@ document.addEventListener('DOMContentLoaded', () => {
         resetDataButton.addEventListener('click', resetAppData);
     }
     
+    // Initialize Check Update button
+    const checkUpdateButton = document.getElementById('checkUpdateButton');
+    if (checkUpdateButton) {
+        checkUpdateButton.addEventListener('click', () => {
+            checkUpdateButton.textContent = 'Checking...';
+            checkUpdateButton.disabled = true;
+            
+            // Check for updates
+            checkForAppUpdates();
+            
+            // Re-enable button after a delay
+            setTimeout(() => {
+                checkUpdateButton.textContent = 'Check Now';
+                checkUpdateButton.disabled = false;
+            }, 2000);
+        });
+    }
+    
     // Log to console that app is ready
     console.log('iOS Test App loaded successfully!');
     
@@ -154,12 +177,189 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: false });
 });
 
+// Load and display version information
+async function loadVersionInfo() {
+    try {
+        const response = await fetch('./version.json');
+        const versionData = await response.json();
+        
+        const versionInfo = document.getElementById('versionInfo');
+        if (versionInfo) {
+            versionInfo.textContent = `Version: ${versionData.version}`;
+        }
+        
+        console.log('[App] Current version:', versionData.version);
+    } catch (error) {
+        console.error('[App] Failed to load version info:', error);
+        const versionInfo = document.getElementById('versionInfo');
+        if (versionInfo) {
+            versionInfo.textContent = 'Version: Unknown';
+        }
+    }
+}
+
+// Check for app updates manually
+function checkForAppUpdates() {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            type: 'CHECK_FOR_UPDATES'
+        });
+    }
+}
+
+// Show update notification when new service worker is installed
+function showUpdateNotification(newWorker) {
+    // Prevent multiple notifications
+    if (window.updateNotificationShown) {
+        return;
+    }
+    window.updateNotificationShown = true;
+    
+    const notification = document.createElement('div');
+    notification.className = 'update-notification';
+    notification.innerHTML = `
+        <div class="update-content">
+            <div class="update-icon">🔄</div>
+            <div class="update-text">
+                <strong>Update Available!</strong>
+                <p>A new version of the app is ready to install.</p>
+            </div>
+            <button class="update-button" id="updateButton">Update Now</button>
+            <button class="update-dismiss" id="dismissUpdate">Later</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show notification with animation
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    // Handle update button click
+    document.getElementById('updateButton').addEventListener('click', () => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+        
+        // Tell the new service worker to skip waiting
+        newWorker.postMessage({ type: 'SKIP_WAITING' });
+        
+        // Reload the page after a short delay
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+    });
+    
+    // Handle dismiss button click
+    document.getElementById('dismissUpdate').addEventListener('click', () => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+            window.updateNotificationShown = false;
+        }, 300);
+    });
+}
+
+// Show version update notification when version.json changes
+function showVersionUpdateNotification(newVersion, oldVersion) {
+    // Prevent multiple notifications
+    if (window.versionUpdateNotificationShown) {
+        return;
+    }
+    window.versionUpdateNotificationShown = true;
+    
+    const notification = document.createElement('div');
+    notification.className = 'update-notification';
+    notification.innerHTML = `
+        <div class="update-content">
+            <div class="update-icon">✨</div>
+            <div class="update-text">
+                <strong>New Version Available!</strong>
+                <p>Version ${newVersion} is now available (current: ${oldVersion})</p>
+            </div>
+            <button class="update-button" id="versionUpdateButton">Refresh</button>
+            <button class="update-dismiss" id="dismissVersionUpdate">Later</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show notification with animation
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    // Handle refresh button click
+    document.getElementById('versionUpdateButton').addEventListener('click', () => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+        
+        // Reload the page to get the latest version
+        window.location.reload();
+    });
+    
+    // Handle dismiss button click
+    document.getElementById('dismissVersionUpdate').addEventListener('click', () => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+            window.versionUpdateNotificationShown = false;
+        }, 300);
+    });
+}
+
 // Service Worker registration for PWA capabilities
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js')
-            .then(reg => console.log('[Service Worker] Registered successfully', reg))
+            .then(reg => {
+                console.log('[Service Worker] Registered successfully', reg);
+                
+                // Check for updates on page load
+                reg.update();
+                
+                // Listen for updates
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    console.log('[Service Worker] Update found, installing new version');
+                    
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New service worker available
+                            console.log('[Service Worker] New version installed and ready');
+                            showUpdateNotification(newWorker);
+                        }
+                    });
+                });
+                
+                // Check for updates periodically (every 5 minutes)
+                setInterval(() => {
+                    console.log('[App] Checking for updates...');
+                    reg.update();
+                }, 5 * 60 * 1000);
+            })
             .catch(err => console.log('[Service Worker] Registration failed', err));
+        
+        // Listen for messages from service worker
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+                console.log('[App] Update available:', event.data.version);
+                showVersionUpdateNotification(event.data.version, event.data.oldVersion);
+            }
+        });
+        
+        // Handle controller change (when new service worker takes over)
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            console.log('[App] New service worker activated');
+            // Optionally reload the page to use the new service worker
+            if (!window.updateNotificationShown) {
+                window.location.reload();
+            }
+        });
     });
 }
 
