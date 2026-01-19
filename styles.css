@@ -279,10 +279,13 @@ footer {
 }
 
 .social-icon {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     color: var(--primary-color);
     transition: color 0.2s ease;
+    shape-rendering: geometricPrecision;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
 }
 
 .social-link:nth-child(1) .social-icon {
