@@ -8,6 +8,14 @@ Test web app for iOS with YouTube search functionality.
 - 🎨 Modern, clean interface  
 - ⚡ Fast and lightweight
 - ✨ iOS optimized
+- 🔄 **Auto-Update System** - Automatic detection and installation of new versions:
+  - Version tracking with `version.json`
+  - Automatic update checks every 5 minutes when online
+  - User-friendly update notifications
+  - Manual update check button
+  - Network-first strategy for critical files
+  - Stale-while-revalidate caching for optimal performance
+  - Offline-first Progressive Web App (PWA) support
 - 🔍 YouTube video search (redirects to YouTube search results)
 - 🎵 **Enhanced Media Player** with comprehensive format support:
   - **Audio formats:** MP3, WAV, OGG, AAC, FLAC, M4A, WebM Audio, Opus, and more
@@ -51,6 +59,29 @@ This app is designed to work with GitHub Pages:
 4. Your app will be available at `https://[username].github.io/iOS-test-app/`
 
 ## Features Detail
+
+### Auto-Update System
+The app includes an intelligent auto-update mechanism that keeps all users on the latest version:
+
+**How it works:**
+- **Version Tracking**: App version is stored in `version.json` and checked regularly
+- **Automatic Checks**: Every 5 minutes, the service worker checks for updates when online
+- **Smart Caching**: Uses network-first strategy for version checks and stale-while-revalidate for other resources
+- **User Notifications**: When an update is detected, users see a friendly notification with option to update immediately or later
+- **Manual Check**: Users can manually check for updates via the "Check for Updates" button
+- **Seamless Updates**: Service worker handles cache updates automatically in the background
+
+**Updating the app:**
+1. Increment the version number in `version.json` (e.g., from "1.0.0" to "1.1.0")
+2. Push changes to your repository/server
+3. Connected users will automatically receive update notifications within 5 minutes
+4. Users click "Update Now" to reload with the latest version
+5. Offline capability is maintained throughout the update process
+
+**For developers:**
+- Update `version.json` with each release
+- The service worker cache name is `ios-test-app-cache-v2`
+- Periodic checks happen every 5 minutes (configurable in `service-worker.js`)
 
 ### YouTube Search
 - Simple search bar that redirects to YouTube search results
