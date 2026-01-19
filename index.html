@@ -1,9 +1,209 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="iOS Test App">
     <title>iOS Test App</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Welcome to the iOS Test App</h1>
-    <p>This is the previous version of index.html before the update.</p>
+    <div class="container">
+        <header>
+            <h1>🚀 iOS Test App</h1>
+            <p class="subtitle">A simple web app for iOS</p>
+        </header>
+ 
+        <main>
+            <section class="card">
+                <h2>Welcome!</h2>
+                <p>This is a web-based application designed to work seamlessly on iOS devices.</p>
+            </section>
+
+            <section class="card">
+                <div class="dropdown-header" id="aboutToggle">
+                    <h2>About</h2>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="dropdown-content" id="aboutContent">
+                    <p>Young individual with interest in music production, data analyzing, coding, and software engineering. Some projects I've been active in are:</p>
+                    <ul class="feature-list">
+                        <li><strong>Game OS:</strong> Windows C#/XAML program to allow media library organization, game launching, and custom GUI like a console.</li>
+                        <li><strong>PS5 OS:</strong> c#//xaml wpf app that manages media, apps and games in the design of a ps5. It uses windows/pc functionality and logic combined with a unique design similar to ps5. Such as intro video, log in screen, dashboard and quick menu. Giving windows/pc users a more streamlined council experience</li>
+                        <li><strong>AppStore:</strong> A GitHub backend store front, allows users to download repos, keep up to date and view repo pages of code/projects from others using a self hosted file to ensure better security and to ensure of no malware. One of the requirements is to only allow open sourced code/projects</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="card socials-section">
+                <h2>Connect with Me</h2>
+                <div class="socials-container">
+                    <a href="https://www.snapchat.com/add/korie.bonx98" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Snapchat">
+                        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509 0 .075-.015.149-.045.225-.24.569-1.273.988-3.146 1.271-.059.091-.12.375-.164.57-.029.179-.074.36-.134.553-.076.271-.27.405-.555.405h-.03c-.135 0-.313-.031-.538-.074-.36-.075-.765-.135-1.273-.135-.3 0-.599.015-.913.074-.6.104-1.123.464-1.723.884-.853.599-1.826 1.288-3.294 1.288-1.47 0-2.441-.69-3.295-1.288-.599-.42-1.121-.78-1.722-.884-.314-.06-.614-.074-.913-.074-.51 0-.914.06-1.275.135-.209.043-.404.074-.584.074-.539 0-.584-.467-.629-.72-.046-.178-.09-.33-.148-.41-1.873-.283-2.906-.704-3.147-1.273-.029-.074-.043-.148-.043-.225-.016-.24.164-.465.42-.509 3.264-.54 4.73-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.434-.884-.658-1.332-.809-.121-.029-.24-.074-.346-.119-1.107-.435-1.257-.93-1.197-1.273.09-.479.674-.793 1.168-.793.146 0 .27.029.383.074.42.194.789.3 1.104.3.234 0 .384-.06.465-.105l-.046-.569c-.098-1.626-.225-3.651.307-4.837C7.392 1.077 10.739.807 11.727.807l.419-.015h.06z"/>
+                        </svg>
+                        <span class="social-label">Snapchat</span>
+                    </a>
+                    <a href="https://www.tiktok.com/@korieb98.private?_r=1&_t=ZN-93BHvuoVpl0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok">
+                        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.589 6.686a4.793 4.793 0 01-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 01-5.201 1.743l-.002-.001.002.001a2.895 2.895 0 013.183-4.51v-3.5a6.329 6.329 0 00-5.394 10.692 6.33 6.33 0 0010.857-4.424V8.687a8.182 8.182 0 004.773 1.526V6.79a4.831 4.831 0 01-1.003-.104z"/>
+                        </svg>
+                        <span class="social-label">TikTok</span>
+                    </a>
+                    <a href="https://on.soundcloud.com/o2iHWQkPofsIpVfpgd" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="SoundCloud">
+                        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" role="img">
+                            <title>SoundCloud</title>
+                            <path d="M23.999 14.165c-.052 1.796-1.612 3.169-3.4 3.169h-8.18a.68.68 0 0 1-.675-.683V7.862a.747.747 0 0 1 .452-.724s.75-.513 2.333-.513a5.364 5.364 0 0 1 2.763.755 5.433 5.433 0 0 1 2.57 3.54c.282-.08.574-.121.868-.12.884 0 1.73.358 2.347.992s.948 1.49.922 2.373ZM10.721 8.421c.247 2.98.427 5.697 0 8.672a.264.264 0 0 1-.53 0c-.395-2.946-.22-5.718 0-8.672a.264.264 0 0 1 .53 0ZM9.072 9.448c.285 2.659.37 4.986-.006 7.655a.277.277 0 0 1-.55 0c-.331-2.63-.256-5.02 0-7.655a.277.277 0 0 1 .556 0Zm-1.663-.257c.27 2.726.39 5.171 0 7.904a.266.266 0 0 1-.532 0c-.38-2.69-.257-5.21 0-7.904a.266.266 0 0 1 .532 0Zm-1.647.77a26.108 26.108 0 0 1-.008 7.147.272.272 0 0 1-.542 0 27.955 27.955 0 0 1 0-7.147.275.275 0 0 1 .55 0Zm-1.67 1.769c.421 1.865.228 3.5-.029 5.388a.257.257 0 0 1-.514 0c-.21-1.858-.398-3.549 0-5.389a.272.272 0 0 1 .543 0Zm-1.655-.273c.388 1.897.26 3.508-.01 5.412-.026.28-.514.283-.54 0-.244-1.878-.347-3.54-.01-5.412a.283.283 0 0 1 .56 0Zm-1.668.911c.4 1.268.257 2.292-.026 3.572a.257.257 0 0 1-.514 0c-.241-1.262-.354-2.312-.023-3.572a.283.283 0 0 1 .563 0Z"/>
+                        </svg>
+                        <span class="social-label">SoundCloud</span>
+                    </a>
+                    <a href="mailto:koriegrant@icloud.com" class="social-link" aria-label="Email">
+                        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                        </svg>
+                        <span class="social-label">Email</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Features</h2>
+                <ul class="feature-list">
+                    <li>📱 Mobile-first responsive design</li>
+                    <li>🎨 Modern, clean interface</li>
+                    <li>⚡ Fast and lightweight</li>
+                    <li>✨ iOS optimized</li>
+                </ul>
+            </section>
+
+            <section class="card interactive">
+                <h2>Try It Out</h2>
+                <p>Tap the button below:</p>
+                <button id="actionButton" class="action-button">Click Me!</button>
+                <p id="clickCount" class="click-count">Clicks: 0</p>
+            </section>
+
+            <section class="card">
+                <h2>Quick Links</h2>
+                <div class="button-container">
+                    <button id="appStoreButton" class="quick-link-button">
+                        <span class="button-icon">🏪</span>
+                        <span>AppStore</span>
+                    </button>
+                    <button id="mediaPlayerButton" class="quick-link-button">
+                        <span class="button-icon">🎵</span>
+                        <span>Media Player</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="card media-player-section" id="mediaPlayerSection" style="display: none;">
+                <div class="media-player-header">
+                    <h2>🎵 Media Player</h2>
+                    <button id="closeMediaPlayer" class="close-button">✕</button>
+                </div>
+                
+                <div class="file-input-container">
+                    <label for="mediaFileInput" class="file-input-label">
+                        <span class="file-icon">📁</span>
+                        <span>Select Media Files</span>
+                    </label>
+                    <input type="file" id="mediaFileInput" accept="audio/*,video/*,.mp3,.mp4,.wav,.ogg,.webm,.avi,.mkv,.mov,.flac,.aac,.m4a,.wmv,.flv,.mpeg,.mpg,.3gp,.oga,.opus,.weba" multiple cl[...]\n                </div>
+
+                <div class="current-media-display" id="currentMediaDisplay">
+                    <p class="no-media-text">No media loaded</p>
+                </div>
+
+                <div class="media-controls">
+                    <button id="prevButton" class="control-button" disabled>
+                        <span>⏮</span>
+                    </button>
+                    <button id="playButton" class="control-button primary" disabled>
+                        <span>▶</span>
+                    </button>
+                    <button id="pauseButton" class="control-button" disabled>
+                        <span>⏸</span>
+                    </button>
+                    <button id="stopButton" class="control-button" disabled>
+                        <span>⏹</span>
+                    </button>
+                    <button id="nextButton" class="control-button" disabled>
+                        <span>⏭</span>
+                    </button>
+                </div>
+
+                <div class="progress-container">
+                    <input type="range" id="progressBar" class="progress-bar" min="0" max="100" value="0" disabled>
+                    <div class="time-display">
+                        <span id="currentTime">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+
+                <div class="playlist-container" id="playlistContainer">
+                    <div class="playlist-header">
+                        <h3>Playlist</h3>
+                        <div class="playlist-actions">
+                            <button id="savePlaylistButton" class="save-playlist-button" disabled>
+                                💾 Save Playlist
+                            </button>
+                            <label for="loadPlaylistInput" class="load-playlist-button">
+                                📁 Load Playlist
+                            </label>
+                            <input type="file" id="loadPlaylistInput" accept=".json,application/json" class="file-input">
+                        </div>
+                    </div>
+                    <ul id="playlist" class="playlist"></ul>
+                </div>
+
+                <audio id="audioPlayer" style="display: none;"></audio>
+                <video id="videoPlayer" style="display: none;" controls></video>
+            </section>
+
+            <section class="card">
+                <h2>🔄 Reset Data</h2>
+                <p>Clear all stored app data and fetch the newest data:</p>
+                <button id="resetDataButton" class="reset-button">Reset Data</button>
+            </section>
+
+            <section class="card">
+                <h2>✨ Check for Updates</h2>
+                <p>Check if a new version of the app is available:</p>
+                <button id="checkUpdateButton" class="action-button" style="width: 100%; margin-top: 10px;">Check Now</button>
+                <p class="search-hint" style="margin-top: 10px;">The app automatically checks for updates every 5 minutes when online.</p>
+            </section>
+
+            <section class="card">
+                <h2>🔍 YouTube Search</h2>
+                <div class="youtube-search">
+                    <p>Search YouTube videos directly:</p>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Search YouTube videos...">
+                        <button id="searchButton" class="search-button">Search</button>
+                    </div>
+                    <p class="search-hint">Enter a search term and click Search to open YouTube results in a new tab</p>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Device Info</h2>
+                <div id="deviceInfo" class="device-info">
+                    <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+                    <p><strong>Screen Size:</strong> <span id="screenSize"></span></p>
+                    <p><strong>Time:</strong> <span id="currentTime"></span></p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 iOS Test App</p>
+            <p class="version-info" id="versionInfo">Version: Loading...</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
