@@ -89,8 +89,10 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('activate', (event) => {
     console.log('[Service Worker] Activating new version');
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
+        (async () => {
+            // Delete old caches
+            const cacheNames = await caches.keys();
+            await Promise.all(
                 cacheNames.map((cacheName) => {
                     if (cacheName !== CACHE_NAME) {
                         console.log('[Service Worker] Deleting old cache:', cacheName);
@@ -98,10 +100,25 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
-        }).then(() => {
+            
             // Claim all clients immediately
-            return self.clients.claim();
-        })
+            await self.clients.claim();
+            
+            // Clear old timer if exists
+            if (updateCheckTimer) {
+                clearInterval(updateCheckTimer);
+            }
+            
+            // Check for updates immediately on activation
+            await checkForUpdates();
+            
+            // Set up periodic checks
+            updateCheckTimer = setInterval(() => {
+                checkForUpdates();
+            }, UPDATE_CHECK_INTERVAL);
+            
+            console.log('[Service Worker] Update checker initialized');
+        })()
     );
 });
 
@@ -168,25 +185,3 @@ async function checkForUpdates() {
         console.error('[Service Worker] Error checking for updates:', error);
     }
 }
-
-// Start periodic update checks when service worker activates
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        (async () => {
-            // Clear old timer if exists
-            if (updateCheckTimer) {
-                clearInterval(updateCheckTimer);
-            }
-            
-            // Check for updates immediately on activation
-            await checkForUpdates();
-            
-            // Set up periodic checks
-            updateCheckTimer = setInterval(() => {
-                checkForUpdates();
-            }, UPDATE_CHECK_INTERVAL);
-            
-            console.log('[Service Worker] Update checker initialized');
-        })()
-    );
-});
