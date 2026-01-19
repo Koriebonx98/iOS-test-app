@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
-  "buildDate": "2026-01-19T15:11:38.883Z",
-  "description": "Initial versioned release"
+  "version": "1.0.1",
+  "buildDate": "2026-01-19T16:18:00.000Z",
+  "description": "Fixed Snapchat and SoundCloud icon SVG paths"
 }
