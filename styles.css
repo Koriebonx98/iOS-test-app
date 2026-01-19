@@ -614,6 +614,35 @@ footer {
     flex-wrap: wrap;
 }
 
+.playlist-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+}
+
+.playlist-button:hover:not(:disabled) {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.playlist-button:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.playlist-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Maintain compatibility with existing button IDs */
 .save-playlist-button,
 .load-playlist-button {
     background: var(--primary-color);

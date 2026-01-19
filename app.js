@@ -772,7 +772,12 @@ function showNotification(message, type = 'success') {
     notificationDiv.className = `notification-message ${type}`;
     
     // Add icon based on type
-    const icon = type === 'success' ? '✓' : type === 'error' ? '⚠' : 'ℹ';
+    const iconMap = {
+        'success': '✓',
+        'error': '⚠',
+        'info': 'ℹ'
+    };
+    const icon = iconMap[type] || 'ℹ';
     notificationDiv.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span><span>${message}</span>`;
     
     const container = document.querySelector('.media-player-section');
@@ -890,11 +895,12 @@ function displayLoadedPlaylist(playlistData) {
     }
 
     // Create a detailed message showing the loaded playlist
-    let message = `Loaded ${playlistData.length} item(s):\n`;
+    const messageLines = [`Loaded ${playlistData.length} item(s):`];
     playlistData.forEach((item, index) => {
-        message += `\n${index + 1}. ${item.name} (${item.type.toUpperCase()} • ${item.format})`;
+        messageLines.push(`${index + 1}. ${item.name} (${item.type.toUpperCase()} • ${item.format})`);
     });
-    message += '\n\nNote: Please add the actual media files to play them.';
+    messageLines.push('\nNote: Please add the actual media files to play them.');
+    const message = messageLines.join('\n');
 
     console.log('[Playlist]', message);
     
