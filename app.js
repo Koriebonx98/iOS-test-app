@@ -207,13 +207,19 @@ function checkForAppUpdates() {
     }
 }
 
+// App state management for notifications
+const appNotificationState = {
+    updateNotificationShown: false,
+    versionUpdateNotificationShown: false
+};
+
 // Show update notification when new service worker is installed
 function showUpdateNotification(newWorker) {
     // Prevent multiple notifications
-    if (window.updateNotificationShown) {
+    if (appNotificationState.updateNotificationShown) {
         return;
     }
-    window.updateNotificationShown = true;
+    appNotificationState.updateNotificationShown = true;
     
     const notification = document.createElement('div');
     notification.className = 'update-notification';
@@ -257,7 +263,7 @@ function showUpdateNotification(newWorker) {
         notification.classList.remove('show');
         setTimeout(() => {
             notification.remove();
-            window.updateNotificationShown = false;
+            appNotificationState.updateNotificationShown = false;
         }, 300);
     });
 }
@@ -265,10 +271,10 @@ function showUpdateNotification(newWorker) {
 // Show version update notification when version.json changes
 function showVersionUpdateNotification(newVersion, oldVersion) {
     // Prevent multiple notifications
-    if (window.versionUpdateNotificationShown) {
+    if (appNotificationState.versionUpdateNotificationShown) {
         return;
     }
-    window.versionUpdateNotificationShown = true;
+    appNotificationState.versionUpdateNotificationShown = true;
     
     const notification = document.createElement('div');
     notification.className = 'update-notification';
@@ -307,7 +313,7 @@ function showVersionUpdateNotification(newVersion, oldVersion) {
         notification.classList.remove('show');
         setTimeout(() => {
             notification.remove();
-            window.versionUpdateNotificationShown = false;
+            appNotificationState.versionUpdateNotificationShown = false;
         }, 300);
     });
 }
@@ -356,7 +362,7 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             console.log('[App] New service worker activated');
             // Optionally reload the page to use the new service worker
-            if (!window.updateNotificationShown) {
+            if (!appNotificationState.updateNotificationShown) {
                 window.location.reload();
             }
         });

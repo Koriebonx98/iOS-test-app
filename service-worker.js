@@ -11,6 +11,9 @@ const STATIC_ASSETS = [
 // Check for updates every 5 minutes
 const UPDATE_CHECK_INTERVAL = 5 * 60 * 1000;
 
+// Periodic update checking timer
+let updateCheckTimer = null;
+
 self.addEventListener('install', (event) => {
     console.log('[Service Worker] Installing new version');
     event.waitUntil(
@@ -133,9 +136,6 @@ self.addEventListener('message', (event) => {
         checkForUpdates();
     }
 });
-
-// Periodic update checking
-let updateCheckTimer = null;
 
 // Check for updates by fetching version.json
 async function checkForUpdates() {
