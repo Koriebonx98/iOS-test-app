@@ -1,1 +1,78 @@
-<li><strong>AppStore:</strong> A GitHub-backed storefront where users can discover, download, and maintain repositories seamlessly. The platform integrates with GitHub to provide updates and comprehensive project pages through an intuitive interface.</li>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="iOS Test App">
+    <title>iOS Test App</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 iOS Test App</h1>
+            <p class="subtitle">A simple web app for iOS</p>
+        </header>
+ 
+        <main>
+            <section class="card">
+                <h2>Welcome!</h2>
+                <p>This is a web-based application designed to work seamlessly on iOS devices.</p>
+            </section>
+
+            <section class="card">
+                <div class="dropdown-header" id="aboutToggle">
+                    <h2>About</h2>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="dropdown-content" id="aboutContent">
+                    <p>Young individual with interest in music production, data analyzing, coding, and software engineering. Some projects I've been active in are:</p>
+                    <ul class="feature-list">
+                        <li><strong>Game OS:</strong> Windows C#/XAML program to allow media library organization, game launching, and custom GUI like a console.</li>
+                        <li><strong>PS5 OS:</strong> C#/XAML WPF app that manages media, apps, and games in the design of a PS5, utilizing Windows/PC functionality and logic combined with a unique design.</li>
+                        <li><strong>AppStore:</strong> A GitHub-backed storefront that allows users to download repositories, keep them up-to-date, and view project pages of code or projects from others using a self-hosted user interface.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="card socials-section">
+                <h2>Connect with Me</h2>
+                <div class="socials-container">
+                    <a href="https://www.snapchat.com/add/korie.bonx98" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Snapchat">
+                        <span class="social-label">Snapchat</span>
+                    </a>
+                    <a href="https://www.tiktok.com/@korieb98.private?_r=1&_t=ZN-93BHvuoVpl0" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok">
+                        <span class="social-label">TikTok</span>
+                    </a>
+                    <a href="https://on.soundcloud.com/o2iHWQkPofsIpVfpgd" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="SoundCloud">
+                        <span class="social-label">SoundCloud</span>
+                    </a>
+                    <a href="mailto:koriegrant@icloud.com" class="social-link" aria-label="Email">
+                        <span class="social-label">Email</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Features</h2>
+                <ul class="feature-list">
+                    <li>📱 Mobile-first responsive design</li>
+                    <li>🎨 Modern, clean interface</li>
+                    <li>⚡ Fast and lightweight</li>
+                    <li>✨ iOS optimized</li>
+                </ul>
+            </section>
+
+            <script src="app.js"></script>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 iOS Test App</p>
+            <p class="version-info" id="versionInfo">Version: Loading...</p>
+        </footer>
+    </div>
+</body>
+</html>
