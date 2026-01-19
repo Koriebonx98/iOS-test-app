@@ -8,6 +8,7 @@ Test web app for iOS with YouTube search functionality.
 - 🎨 Modern, clean interface  
 - ⚡ Fast and lightweight
 - ✨ iOS optimized
+- 📧 **Contact Me Button** - Easy email contact functionality using mailto: protocol
 - 🔄 **Auto-Update System** - Automatic detection and installation of new versions:
   - Version tracking with `version.json`
   - Automatic update checks every 5 minutes when online
@@ -88,6 +89,13 @@ The app includes an intelligent auto-update mechanism that keeps all users on th
 - Opens results in a new tab, just like YouTube's search
 - No API key required - works immediately
 - Supports keyboard Enter key for quick searches
+
+### Contact Me Button
+- Prominent "Contact Me" button in the "Get in Touch" section
+- Uses mailto: protocol to open default email client
+- Pre-configured to send email to koriegrant@icloud.com
+- Styled with blue gradient to match the app's design
+- Works on all major browsers and email clients (Gmail, Outlook, Apple Mail, etc.)
 
 ### Interactive Counter
 - Click tracking with localStorage persistence
