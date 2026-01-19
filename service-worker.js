@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ios-test-app-cache-v2';
+const CACHE_NAME = 'ios-test-app-cache-v3';
 const VERSION_FILE = './version.json';
 const STATIC_ASSETS = [
     './',
@@ -66,25 +66,28 @@ self.addEventListener('fetch', (event) => {
                 })
         );
     } else {
-        // For non-navigation requests, use stale-while-revalidate strategy
+        // For non-navigation requests, use network-first strategy for static assets
         event.respondWith(
-            caches.match(event.request).then((cachedResponse) => {
-                const fetchPromise = fetch(event.request)
-                    .then((networkResponse) => {
-                        // Update cache in the background
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(event.request, networkResponse.clone());
-                        });
-                        return networkResponse;
-                    })
-                    .catch(() => {
-                        // If fetch fails, we already have cachedResponse
-                        return cachedResponse;
+            fetch(event.request)
+                .then((networkResponse) => {
+                    // Clone the response to store it in cache
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
                     });
-                
-                // Return cached response immediately if available, otherwise wait for network
-                return cachedResponse || fetchPromise;
-            })
+                    return networkResponse;
+                })
+                .catch((error) => {
+                    console.log('[Service Worker] Network fetch failed, trying cache:', error);
+                    // If network fails, fallback to cache
+                    return caches.match(event.request).then((cachedResponse) => {
+                        if (cachedResponse) {
+                            return cachedResponse;
+                        }
+                        // If cache also fails, throw error
+                        throw new Error('No cached response available and network fetch failed');
+                    });
+                })
         );
     }
 });
