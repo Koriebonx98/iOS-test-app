@@ -24,9 +24,12 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
     // Use network-first strategy for HTML, CSS, and JS files to ensure updates are fetched
     const url = new URL(event.request.url);
+    const pathname = url.pathname;
+    
+    // Check if this is a static asset using exact path matching
     const isStaticAsset = STATIC_ASSETS.some(asset => {
-        const assetPath = asset.replace('./', '/');
-        return url.pathname === assetPath || url.pathname === '/' + asset || url.pathname.endsWith(asset);
+        const normalizedAsset = asset.startsWith('./') ? asset.substring(1) : asset;
+        return pathname === normalizedAsset || pathname === '/' + normalizedAsset.replace(/^\//, '');
     });
     
     if (isStaticAsset || event.request.mode === 'navigate') {
@@ -37,7 +40,11 @@ self.addEventListener('fetch', (event) => {
                     // Clone the response before caching
                     const responseToCache = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache);
+                        cache.put(event.request, responseToCache).catch((error) => {
+                            console.log('[Service Worker] Cache put error:', error);
+                        });
+                    }).catch((error) => {
+                        console.log('[Service Worker] Cache open error:', error);
                     });
                     return response;
                 })
