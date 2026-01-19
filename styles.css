@@ -308,6 +308,10 @@ footer p {
     color: #FF5500;
 }
 
+.social-link:nth-child(4) .social-icon {
+    color: #007AFF;
+}
+
 @media (prefers-color-scheme: dark) {
     .social-link:nth-child(2) .social-icon {
         color: #FFFFFF;
