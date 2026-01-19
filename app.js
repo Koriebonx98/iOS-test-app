@@ -38,7 +38,7 @@ actionButton.addEventListener('click', () => {
 function updateDeviceInfo() {
     const userAgent = document.getElementById('userAgent');
     const screenSize = document.getElementById('screenSize');
-    const currentTime = document.getElementById('currentTime');
+    const deviceCurrentTime = document.getElementById('deviceCurrentTime');
     
     // Load from localStorage if offline
     if (!navigator.onLine) {
@@ -65,7 +65,7 @@ function updateDeviceInfo() {
     // Update time
     function updateTime() {
         const now = new Date();
-        currentTime.textContent = now.toLocaleTimeString();
+        deviceCurrentTime.textContent = now.toLocaleTimeString();
     }
     
     updateTime();
