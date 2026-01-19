@@ -78,14 +78,17 @@ self.addEventListener('fetch', (event) => {
                     return networkResponse;
                 })
                 .catch((error) => {
-                    console.log('[Service Worker] Network fetch failed, trying cache:', error);
+                    console.log('[Service Worker] Network fetch failed for:', event.request.url, error);
                     // If network fails, fallback to cache
                     return caches.match(event.request).then((cachedResponse) => {
                         if (cachedResponse) {
+                            console.log('[Service Worker] Serving from cache:', event.request.url);
                             return cachedResponse;
                         }
-                        // If cache also fails, throw error
-                        throw new Error('No cached response available and network fetch failed');
+                        // If cache also fails, throw error with resource info
+                        const errorMsg = `Failed to fetch resource: ${event.request.url}. No cached version available.`;
+                        console.error('[Service Worker]', errorMsg);
+                        throw new Error(errorMsg);
                     });
                 })
         );
