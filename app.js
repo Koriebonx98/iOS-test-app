@@ -116,9 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize About dropdown toggle
     initializeAboutDropdown();
     
-    // Load saved playlist
-    loadSavedPlaylist();
-    
     // Check online/offline status
     function updateOnlineStatus() {
         if (navigator.onLine) {
@@ -767,6 +764,7 @@ function resetAppData() {
 
 // Playlist Save/Load Functionality
 const savePlaylistButton = document.getElementById('savePlaylistButton');
+const loadPlaylistInput = document.getElementById('loadPlaylistInput');
 
 // Show notification message
 function showNotification(message, type = 'success') {
@@ -774,95 +772,152 @@ function showNotification(message, type = 'success') {
     notificationDiv.className = `notification-message ${type}`;
     
     // Add icon based on type
-    const icon = type === 'success' ? '✓' : 'ℹ';
+    const icon = type === 'success' ? '✓' : type === 'error' ? '⚠' : 'ℹ';
     notificationDiv.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span><span>${message}</span>`;
     
     const container = document.querySelector('.media-player-section');
     if (container) {
         container.insertBefore(notificationDiv, container.children[1]);
         
-        // Remove notification message after 3 seconds
+        // Remove notification message after 5 seconds for errors, 3 seconds for others
+        const timeout = type === 'error' ? 5000 : 3000;
         setTimeout(() => {
             notificationDiv.style.animation = 'slideOut 0.3s ease';
             setTimeout(() => notificationDiv.remove(), 300);
-        }, 3000);
+        }, timeout);
     }
 }
 
 /**
- * Get current playlist metadata for saving to localStorage.
- * Note: Due to browser security restrictions, only metadata (file names, types, formats)
- * can be saved. The actual file data, URLs, and File objects cannot be persisted.
- * Users will need to re-add their media files after reloading the page.
- * 
- * @returns {Array<{name: string, type: string, format: string}>} Array of playlist items with name, type, and format properties
+ * Save playlist to a JSON file and trigger download.
+ * Creates a downloadable JSON file with the current playlist metadata.
  */
-function getCurrentPlaylist() {
-    return mediaPlaylist.map(media => ({
-        name: media.name,
-        type: media.type,
-        format: media.format
-    }));
-}
-
-/**
- * Save the current playlist to localStorage.
- * Serializes playlist metadata (names, types, formats) along with a timestamp
- * and stores it in localStorage for persistence across sessions.
- * Shows a success notification when saved, or an info notification if playlist is empty.
- */
-function savePlaylist() {
+function savePlaylistToFile() {
     if (mediaPlaylist.length === 0) {
         showNotification('No items in the playlist to save.', 'info');
         return;
     }
 
-    const playlist = getCurrentPlaylist();
-    const timestamp = new Date().toISOString();
-    const savedData = { playlist, timestamp };
+    // Get current date for filename (format: MM-DD-YYYY)
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const year = now.getFullYear();
+    const filename = `playlist_${month}-${day}-${year}.json`;
 
-    localStorage.setItem('savedPlaylist', JSON.stringify(savedData));
+    // Prepare playlist data (metadata only)
+    const playlistData = mediaPlaylist.map(media => ({
+        name: media.name,
+        type: media.type,
+        format: media.format
+    }));
+
+    const data = JSON.stringify(playlistData, null, 2);
+
+    // Create blob and trigger download
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+
     showNotification('Playlist saved successfully!', 'success');
-    console.log('[Playlist] Saved playlist with', playlist.length, 'items');
+    console.log('[Playlist] Saved', playlistData.length, 'items to file:', filename);
 }
 
 /**
- * Display saved playlist information.
- * Shows a notification with the timestamp when the playlist was last saved.
+ * Load playlist from a JSON file.
+ * Reads and validates the playlist file, then displays the playlist structure.
+ * Note: Only metadata is loaded. Users must re-add the actual media files.
  * 
- * @param {Array<{name: string, type: string, format: string}>} playlistData - The playlist data to display
- * @param {string} timestamp - ISO 8601 timestamp when the playlist was saved
+ * @param {File} file - The JSON file containing the playlist
  */
-function displayPlaylist(playlistData, timestamp) {
-    if (!playlistData || playlistData.length === 0) return;
+function loadPlaylistFromFile(file) {
+    if (!file) return;
 
-    // Show notification about the saved playlist
-    const date = new Date(timestamp);
-    const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-    showNotification(`Playlist loaded from last session (${formattedDate})`, 'info');
-    console.log('[Playlist] Found saved playlist with', playlistData.length, 'items');
-    console.log('[Playlist] Note: Files need to be re-added by the user');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const playlist = JSON.parse(e.target.result);
+            
+            // Validate playlist structure
+            if (!Array.isArray(playlist)) {
+                throw new Error('Invalid playlist structure. Expected an array.');
+            }
+
+            // Validate each playlist item
+            for (let i = 0; i < playlist.length; i++) {
+                const item = playlist[i];
+                if (!item.name || !item.type || !item.format) {
+                    throw new Error(`Invalid item at index ${i}. Missing required fields (name, type, format).`);
+                }
+                if (item.type !== 'audio' && item.type !== 'video') {
+                    throw new Error(`Invalid media type "${item.type}" at index ${i}. Expected "audio" or "video".`);
+                }
+            }
+
+            // Display the loaded playlist structure
+            displayLoadedPlaylist(playlist);
+            
+            showNotification('Playlist loaded successfully!', 'success');
+            console.log('[Playlist] Loaded', playlist.length, 'items from file');
+        } catch (error) {
+            showNotification('Error loading playlist: ' + error.message, 'error');
+            console.error('[Playlist] Load error:', error);
+        }
+    };
+
+    reader.onerror = () => {
+        showNotification('Error reading file. Please try again.', 'error');
+        console.error('[Playlist] File read error');
+    };
+
+    reader.readAsText(file);
 }
 
 /**
- * Load saved playlist from localStorage on page load.
- * Parses the saved data and displays notification if a playlist is found.
+ * Display loaded playlist information.
+ * Shows the playlist structure to the user with instructions to add the actual files.
+ * 
+ * @param {Array<{name: string, type: string, format: string}>} playlistData - The loaded playlist data
  */
-function loadSavedPlaylist() {
-    const savedData = localStorage.getItem('savedPlaylist');
-    if (savedData) {
-        try {
-            const { playlist, timestamp } = JSON.parse(savedData);
-            displayPlaylist(playlist, timestamp);
-        } catch (error) {
-            console.error('[Playlist] Error loading saved playlist:', error);
-        }
+function displayLoadedPlaylist(playlistData) {
+    if (!playlistData || playlistData.length === 0) {
+        showNotification('Loaded playlist is empty.', 'info');
+        return;
     }
+
+    // Create a detailed message showing the loaded playlist
+    let message = `Loaded ${playlistData.length} item(s):\n`;
+    playlistData.forEach((item, index) => {
+        message += `\n${index + 1}. ${item.name} (${item.type.toUpperCase()} • ${item.format})`;
+    });
+    message += '\n\nNote: Please add the actual media files to play them.';
+
+    console.log('[Playlist]', message);
+    
+    // Show a more user-friendly notification
+    const itemText = playlistData.length === 1 ? 'item' : 'items';
+    showNotification(`Loaded ${playlistData.length} ${itemText}. Check console for details. Add your media files to play them.`, 'success');
 }
 
 // Bind save button event
 if (savePlaylistButton) {
-    savePlaylistButton.addEventListener('click', savePlaylist);
+    savePlaylistButton.addEventListener('click', savePlaylistToFile);
+}
+
+// Bind load playlist input event
+if (loadPlaylistInput) {
+    loadPlaylistInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            loadPlaylistFromFile(file);
+        }
+        // Clear the input so the same file can be loaded again if needed
+        e.target.value = '';
+    });
 }
 
 /**

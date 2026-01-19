@@ -138,9 +138,15 @@
                 <div class="playlist-container" id="playlistContainer">
                     <div class="playlist-header">
                         <h3>Playlist</h3>
-                        <button id="savePlaylistButton" class="save-playlist-button" disabled>
-                            💾 Save Playlist
-                        </button>
+                        <div class="playlist-actions">
+                            <button id="savePlaylistButton" class="save-playlist-button" disabled>
+                                💾 Save Playlist
+                            </button>
+                            <label for="loadPlaylistInput" class="load-playlist-button">
+                                📁 Load Playlist
+                            </label>
+                            <input type="file" id="loadPlaylistInput" accept=".json,application/json" class="file-input">
+                        </div>
                     </div>
                     <ul id="playlist" class="playlist"></ul>
                 </div>

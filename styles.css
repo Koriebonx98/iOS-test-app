@@ -608,7 +608,14 @@ footer {
     color: var(--text-color);
 }
 
-.save-playlist-button {
+.playlist-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.save-playlist-button,
+.load-playlist-button {
     background: var(--primary-color);
     color: white;
     border: none;
@@ -622,12 +629,14 @@ footer {
     white-space: nowrap;
 }
 
-.save-playlist-button:hover:not(:disabled) {
+.save-playlist-button:hover:not(:disabled),
+.load-playlist-button:hover {
     background: var(--secondary-color);
     transform: translateY(-2px);
 }
 
-.save-playlist-button:active:not(:disabled) {
+.save-playlist-button:active:not(:disabled),
+.load-playlist-button:active {
     transform: scale(0.95);
 }
 
@@ -764,6 +773,11 @@ footer {
 
 .notification-message.info {
     background: var(--primary-color);
+    color: white;
+}
+
+.notification-message.error {
+    background: #FF3B30;
     color: white;
 }
 
