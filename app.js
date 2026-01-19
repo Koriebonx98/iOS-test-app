@@ -890,7 +890,7 @@ function updateProgress() {
         progressBar.value = progress;
     }
     
-    const currentTimeDisplay = document.getElementById('currentTime');
+    const currentTimeDisplay = document.getElementById('mediaCurrentTime');
     const durationDisplay = document.getElementById('duration');
     
     if (currentTimeDisplay) {
