@@ -264,6 +264,37 @@ footer p {
     margin-top: 20px;
 }
 
+/* Contact Section Styles */
+.contact-section {
+    text-align: center;
+}
+
+.contact-button {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 20px 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.contact-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+}
+
+.contact-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.4);
+}
+
 .social-link {
     display: flex;
     flex-direction: column;
