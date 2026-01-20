@@ -26,13 +26,17 @@ const VISITOR_CONFIG = {
     STORAGE_KEY_VISIT_COUNT: 'visitor_visit_count',
     STORAGE_KEY_PENDING_QUEUE: 'visitor_pending_queue',
     
-    // GitHub API settings
-    USE_GITHUB_API: true, // Use GitHub API instead of backend server
-    FALLBACK_TO_LOCALSTORAGE: true, // Fallback to localStorage if GitHub API fails
+    // Webhook settings - send visitor data to simple webhook server
+    USE_WEBHOOK: true, // Use webhook to update visitors.json file
+    WEBHOOK_URL: 'http://localhost:3001/webhook/update-visitor', // Webhook endpoint (change for production)
+    FALLBACK_TO_LOCALSTORAGE: true, // Always save to localStorage
+    
+    // Legacy GitHub API settings (deprecated)
+    USE_GITHUB_API: false,
     
     // Legacy API settings (deprecated, kept for backward compatibility)
     API_ENABLED: false,
-    API_URL: 'http://localhost:3000/track', // Change to your production URL
+    API_URL: 'http://localhost:3000/track',
     MAX_RETRIES: 3,
     RETRY_DELAY: 2000, // 2 seconds
     REQUEST_TIMEOUT: 10000, // 10 seconds
@@ -193,42 +197,68 @@ function addToPendingQueue(visitorData) {
 }
 
 /**
- * Send visitor data to GitHub repository with retry logic
+ * Send visitor data to webhook server
+ * The webhook server updates visitors.json directly without requiring API keys
  * 
  * @param {Object} visitorData - Visitor data to send
  * @returns {Promise<boolean>} True if successful, false otherwise
  */
-async function sendVisitorDataToGitHub(visitorData) {
-    if (!VISITOR_CONFIG.USE_GITHUB_API) {
-        console.log('[Visitor Tracker] GitHub API integration disabled');
-        return false;
-    }
-
-    // Check if GitHub API helper is loaded
-    if (typeof window.githubAPI === 'undefined') {
-        console.error('[Visitor Tracker] GitHub API helper not loaded. Please include github-api-helper.js before visitor-tracker.js');
+async function sendVisitorDataToWebhook(visitorData) {
+    if (!VISITOR_CONFIG.USE_WEBHOOK) {
+        console.log('[Visitor Tracker] Webhook integration disabled');
         return false;
     }
 
     try {
-        console.log('[Visitor Tracker] Sending visitor data to GitHub repository...');
+        console.log('[Visitor Tracker] Sending visitor data to webhook server...');
+        console.log('[Visitor Tracker] Webhook URL:', VISITOR_CONFIG.WEBHOOK_URL);
         
-        const result = await window.githubAPI.updateVisitor(visitorData);
+        // Create an AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), VISITOR_CONFIG.REQUEST_TIMEOUT);
         
-        if (result.success) {
-            console.log('[Visitor Tracker] Successfully updated visitor data in GitHub repository');
-            console.log('[Visitor Tracker] Total visitors:', result.totalVisitors);
-            return true;
-        } else {
-            throw new Error('GitHub API update failed');
+        try {
+            const response = await fetch(VISITOR_CONFIG.WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(visitorData),
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log('[Visitor Tracker] ✅ Successfully sent visitor data to webhook');
+                console.log('[Visitor Tracker] Total visitors in repository:', result.totalVisitors);
+                console.log('[Visitor Tracker] visitors.json file has been updated in the repository');
+                return true;
+            } else {
+                throw new Error(result.error || 'Webhook update failed');
+            }
+        } finally {
+            clearTimeout(timeoutId);
         }
         
     } catch (error) {
-        console.error('[Visitor Tracker] Error sending visitor data to GitHub:', error.message);
+        console.warn('[Visitor Tracker] ⚠️ Webhook update failed:', error.message);
+        console.log('[Visitor Tracker] This is expected if webhook server is not running');
+        console.log('[Visitor Tracker] Visitor data is safely stored in browser localStorage');
+        console.log('[Visitor Tracker] To enable automatic updates to visitors.json:');
+        console.log('[Visitor Tracker]   1. Start webhook server: cd server && node webhook-server.js');
+        console.log('[Visitor Tracker]   2. Or deploy the webhook server to production');
+        console.log('[Visitor Tracker]   3. Update WEBHOOK_URL in visitor-tracker.js');
         
-        // Fallback to localStorage if enabled
+        // Fallback to localStorage if enabled (data is already saved)
         if (VISITOR_CONFIG.FALLBACK_TO_LOCALSTORAGE) {
-            console.log('[Visitor Tracker] Falling back to localStorage storage');
+            console.log('[Visitor Tracker] ✅ Data safely stored in browser localStorage');
             addToPendingQueue(visitorData);
         }
         
@@ -386,12 +416,19 @@ async function trackVisitorUDID() {
             
             visitorData = { ...visitor };
             
+            console.log('═══════════════════════════════════════════════════════════════');
+            console.log('🔄 REAL VISITOR DETECTED - RETURNING VISITOR');
+            console.log('═══════════════════════════════════════════════════════════════');
             console.log('[Visitor Tracker] Updated existing visitor:', {
                 udid: visitor.udid,
                 visitCount: visitor.visitCount,
                 firstVisit: visitor.firstVisit,
-                lastVisit: visitor.lastVisit
+                lastVisit: visitor.lastVisit,
+                platform: visitor.platform,
+                userAgent: visitor.userAgent.substring(0, 50) + '...'
             });
+            console.log('✅ Visitor data saved to localStorage');
+            console.log('═══════════════════════════════════════════════════════════════');
         } else {
             // Create new visitor record
             const newVisitor = {
@@ -415,7 +452,12 @@ async function trackVisitorUDID() {
             
             visitorData = { ...newVisitor };
             
+            console.log('═══════════════════════════════════════════════════════════════');
+            console.log('🎉 REAL VISITOR DETECTED - NEW VISITOR');
+            console.log('═══════════════════════════════════════════════════════════════');
             console.log('[Visitor Tracker] Added new visitor:', newVisitor);
+            console.log('✅ Visitor data saved to localStorage');
+            console.log('═══════════════════════════════════════════════════════════════');
         }
         
         // Save updated visitors data to localStorage
@@ -426,11 +468,14 @@ async function trackVisitorUDID() {
         localStorage.setItem(VISITOR_CONFIG.STORAGE_KEY_LAST_VISIT, visitorState.lastVisit);
         localStorage.setItem(VISITOR_CONFIG.STORAGE_KEY_VISIT_COUNT, visitorState.visitCount.toString());
         
-        // Send data to GitHub repository (primary) or API endpoint (fallback)
-        if (VISITOR_CONFIG.USE_GITHUB_API) {
-            await sendVisitorDataToGitHub(visitorData);
-        } else {
+        // Send data to webhook endpoint that updates visitors.json in repository
+        if (VISITOR_CONFIG.USE_WEBHOOK) {
+            await sendVisitorDataToWebhook(visitorData);
+        } else if (VISITOR_CONFIG.API_ENABLED) {
             await sendVisitorDataToAPI(visitorData);
+        } else {
+            console.log('[Visitor Tracker] ℹ️ No webhook configured - visitor data saved locally only');
+            console.log('[Visitor Tracker] To sync with repository, configure WEBHOOK_URL in visitor-tracker.js');
         }
         
         return {
