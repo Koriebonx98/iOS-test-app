@@ -1,5 +1,5 @@
 {
-  "version": "1.0.9",
+  "version": "1.1.0",
   "buildDate": "2026-01-20",
-  "description": "Enhanced auto-update system: Updates now propagate to all devices within 2 minutes. Added GitHub API visitor tracking without backend server."
+  "description": "Enhanced visitor tracking with real-time UDID-based tracking, automatic duplicate prevention, and seamless GitHub API integration for persistent visitor data storage."
 }
