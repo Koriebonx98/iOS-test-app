@@ -21,6 +21,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const AUDIENCE_FILE = path.join(__dirname, 'data', 'audience.json');
+const VISITORS_FILE = path.join(__dirname, 'data', 'visitors.json');
 
 // Security middleware
 app.use(helmet());
@@ -278,6 +279,144 @@ app.get('/api/audience/data', authenticateApiKey, async (req, res) => {
         res.status(500).json({ 
             error: 'Internal Server Error', 
             message: 'Failed to get audience data' 
+        });
+    }
+});
+
+/**
+ * Load visitors data from file
+ * @returns {Promise<Array>} Visitors data array
+ */
+async function loadVisitorsData() {
+    try {
+        const data = await fs.readFile(VISITORS_FILE, 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        // If file doesn't exist or is invalid, return empty array
+        console.log('[Load Visitors] Creating new visitors data structure');
+        return [];
+    }
+}
+
+/**
+ * Save visitors data to file
+ * @param {Array} visitors - Visitors data array to save
+ */
+async function saveVisitorsData(visitors) {
+    try {
+        // Ensure data directory exists
+        const dir = path.dirname(VISITORS_FILE);
+        await fs.mkdir(dir, { recursive: true });
+        
+        // Save with pretty formatting for readability
+        await fs.writeFile(VISITORS_FILE, JSON.stringify(visitors, null, 2), 'utf8');
+        console.log('[Save Visitors] Visitors data saved successfully');
+    } catch (error) {
+        console.error('[Save Visitors] Error saving visitors data:', error.message);
+        throw error;
+    }
+}
+
+/**
+ * POST /track
+ * Track a visitor with comprehensive data
+ * 
+ * Expected payload:
+ * {
+ *   udid: string,
+ *   firstVisit: string (ISO 8601),
+ *   lastVisit: string (ISO 8601),
+ *   visitCount: number,
+ *   userAgent: string,
+ *   screenSize: string,
+ *   language: string,
+ *   platform: string,
+ *   timeZone: string
+ * }
+ */
+app.post('/track', async (req, res) => {
+    try {
+        const visitorData = req.body;
+        
+        // Validate required fields
+        if (!visitorData.udid || !visitorData.firstVisit || !visitorData.lastVisit) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Bad Request', 
+                message: 'udid, firstVisit, and lastVisit are required' 
+            });
+        }
+        
+        console.log('[Track Visitor] Received visitor data:', {
+            udid: visitorData.udid,
+            visitCount: visitorData.visitCount,
+            isNew: !visitorData.visitCount || visitorData.visitCount === 1
+        });
+        
+        // Load current visitors data
+        const visitors = await loadVisitorsData();
+        
+        // Check if visitor already exists
+        const existingVisitorIndex = visitors.findIndex(v => v.udid === visitorData.udid);
+        
+        if (existingVisitorIndex !== -1) {
+            // Update existing visitor record
+            visitors[existingVisitorIndex] = {
+                ...visitors[existingVisitorIndex],
+                ...visitorData,
+                lastUpdated: new Date().toISOString()
+            };
+            console.log('[Track Visitor] Updated existing visitor:', visitorData.udid);
+        } else {
+            // Add new visitor
+            visitors.push({
+                ...visitorData,
+                lastUpdated: new Date().toISOString()
+            });
+            console.log('[Track Visitor] Added new visitor:', visitorData.udid);
+        }
+        
+        // Save updated data
+        await saveVisitorsData(visitors);
+        
+        // Return success response with current stats
+        res.json({
+            success: true,
+            totalVisitors: visitors.length,
+            timestamp: new Date().toISOString()
+        });
+        
+    } catch (error) {
+        console.error('[Track Visitor] Error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Internal Server Error', 
+            message: 'Failed to track visitor' 
+        });
+    }
+});
+
+/**
+ * GET /visitors
+ * Get all visitors data
+ */
+app.get('/visitors', async (req, res) => {
+    try {
+        const visitors = await loadVisitorsData();
+        
+        res.json({
+            success: true,
+            visitors: visitors,
+            totalVisitors: visitors.length,
+            timestamp: new Date().toISOString()
+        });
+        
+    } catch (error) {
+        console.error('[Get Visitors] Error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Internal Server Error', 
+            message: 'Failed to get visitors data' 
         });
     }
 });

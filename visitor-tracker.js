@@ -24,6 +24,14 @@ const VISITOR_CONFIG = {
     STORAGE_KEY_FIRST_VISIT: 'visitor_first_visit',
     STORAGE_KEY_LAST_VISIT: 'visitor_last_visit',
     STORAGE_KEY_VISIT_COUNT: 'visitor_visit_count',
+    STORAGE_KEY_PENDING_QUEUE: 'visitor_pending_queue',
+    
+    // API settings
+    API_ENABLED: true,
+    API_URL: 'http://localhost:3000/track', // Change to your production URL
+    MAX_RETRIES: 3,
+    RETRY_DELAY: 2000, // 2 seconds
+    REQUEST_TIMEOUT: 10000, // 10 seconds
     
     // Notification settings
     SHOW_NOTIFICATION: true,
@@ -130,12 +138,164 @@ function saveVisitorsData(visitors) {
 }
 
 /**
+ * Get pending queue from localStorage
+ * 
+ * @returns {Array} Array of pending visitor data payloads
+ */
+function getPendingQueue() {
+    try {
+        const queue = localStorage.getItem(VISITOR_CONFIG.STORAGE_KEY_PENDING_QUEUE);
+        return queue ? JSON.parse(queue) : [];
+    } catch (error) {
+        console.error('[Visitor Tracker] Error loading pending queue:', error);
+        return [];
+    }
+}
+
+/**
+ * Save pending queue to localStorage
+ * 
+ * @param {Array} queue - Array of pending visitor data payloads
+ */
+function savePendingQueue(queue) {
+    try {
+        localStorage.setItem(VISITOR_CONFIG.STORAGE_KEY_PENDING_QUEUE, JSON.stringify(queue));
+        console.log('[Visitor Tracker] Saved', queue.length, 'items to pending queue');
+    } catch (error) {
+        console.error('[Visitor Tracker] Error saving pending queue:', error);
+    }
+}
+
+/**
+ * Add visitor data to pending queue for later retry
+ * 
+ * @param {Object} visitorData - Visitor data to queue
+ */
+function addToPendingQueue(visitorData) {
+    try {
+        const queue = getPendingQueue();
+        queue.push({
+            data: visitorData,
+            timestamp: new Date().toISOString(),
+            retries: 0
+        });
+        savePendingQueue(queue);
+        console.log('[Visitor Tracker] Added visitor data to pending queue');
+    } catch (error) {
+        console.error('[Visitor Tracker] Error adding to pending queue:', error);
+    }
+}
+
+/**
+ * Send visitor data to API endpoint with retry logic
+ * 
+ * @param {Object} visitorData - Visitor data to send
+ * @param {number} retryCount - Current retry attempt (default 0)
+ * @returns {Promise<boolean>} True if successful, false otherwise
+ */
+async function sendVisitorDataToAPI(visitorData, retryCount = 0) {
+    if (!VISITOR_CONFIG.API_ENABLED) {
+        console.log('[Visitor Tracker] API integration disabled');
+        return false;
+    }
+
+    try {
+        console.log(`[Visitor Tracker] Sending visitor data to API (attempt ${retryCount + 1}/${VISITOR_CONFIG.MAX_RETRIES + 1})...`);
+        
+        // Create an AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), VISITOR_CONFIG.REQUEST_TIMEOUT);
+        
+        const response = await fetch(VISITOR_CONFIG.API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(visitorData),
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('[Visitor Tracker] Successfully sent visitor data to API:', result);
+        return true;
+        
+    } catch (error) {
+        console.error(`[Visitor Tracker] Error sending visitor data (attempt ${retryCount + 1}):`, error.message);
+        
+        // Retry logic
+        if (retryCount < VISITOR_CONFIG.MAX_RETRIES) {
+            console.log(`[Visitor Tracker] Retrying in ${VISITOR_CONFIG.RETRY_DELAY / 1000} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, VISITOR_CONFIG.RETRY_DELAY));
+            return await sendVisitorDataToAPI(visitorData, retryCount + 1);
+        } else {
+            console.warn('[Visitor Tracker] Max retries reached. Adding to pending queue for later.');
+            addToPendingQueue(visitorData);
+            return false;
+        }
+    }
+}
+
+/**
+ * Process pending queue - attempt to send queued items
+ * 
+ * @returns {Promise<number>} Number of items successfully sent
+ */
+async function processPendingQueue() {
+    try {
+        const queue = getPendingQueue();
+        
+        if (queue.length === 0) {
+            return 0;
+        }
+        
+        console.log(`[Visitor Tracker] Processing ${queue.length} pending items...`);
+        
+        const remainingQueue = [];
+        let successCount = 0;
+        
+        for (const item of queue) {
+            const success = await sendVisitorDataToAPI(item.data, 0);
+            
+            if (success) {
+                successCount++;
+            } else {
+                // Keep in queue if failed
+                item.retries = (item.retries || 0) + 1;
+                
+                // Remove from queue if too many retries (prevent infinite queue growth)
+                if (item.retries < 10) {
+                    remainingQueue.push(item);
+                } else {
+                    console.warn('[Visitor Tracker] Dropping item from queue after too many retries:', item.data.udid);
+                }
+            }
+        }
+        
+        savePendingQueue(remainingQueue);
+        console.log(`[Visitor Tracker] Processed queue: ${successCount} sent, ${remainingQueue.length} remaining`);
+        
+        return successCount;
+        
+    } catch (error) {
+        console.error('[Visitor Tracker] Error processing pending queue:', error);
+        return 0;
+    }
+}
+
+/**
  * Track the current visitor
  * Updates or creates a visitor record with visit information
+ * Sends data to API endpoint
  * 
- * @returns {Object} Visitor data object
+ * @returns {Promise<Object>} Visitor data object
  */
-function trackVisitorUDID() {
+async function trackVisitorUDID() {
     try {
         // Get or create UDID
         const udid = getOrCreateUDID();
@@ -150,16 +310,27 @@ function trackVisitorUDID() {
         // Check if visitor already exists
         const existingVisitorIndex = visitors.findIndex(v => v.udid === udid);
         
+        let visitorData;
+        
         if (existingVisitorIndex !== -1) {
             // Update existing visitor record
             const visitor = visitors[existingVisitorIndex];
             visitor.lastVisit = now;
             visitor.visitCount = (visitor.visitCount || 1) + 1;
             
+            // Update device information in case it changed
+            visitor.userAgent = navigator.userAgent;
+            visitor.screenSize = `${window.innerWidth}x${window.innerHeight}`;
+            visitor.language = navigator.language || navigator.userLanguage;
+            visitor.platform = navigator.platform;
+            visitor.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
             // Update state
             visitorState.visitCount = visitor.visitCount;
             visitorState.firstVisit = visitor.firstVisit;
             visitorState.lastVisit = visitor.lastVisit;
+            
+            visitorData = { ...visitor };
             
             console.log('[Visitor Tracker] Updated existing visitor:', {
                 udid: visitor.udid,
@@ -188,16 +359,21 @@ function trackVisitorUDID() {
             visitorState.firstVisit = now;
             visitorState.lastVisit = now;
             
+            visitorData = { ...newVisitor };
+            
             console.log('[Visitor Tracker] Added new visitor:', newVisitor);
         }
         
-        // Save updated visitors data
+        // Save updated visitors data to localStorage
         saveVisitorsData(visitors);
         
         // Store individual visitor data in localStorage for quick access
         localStorage.setItem(VISITOR_CONFIG.STORAGE_KEY_FIRST_VISIT, visitorState.firstVisit);
         localStorage.setItem(VISITOR_CONFIG.STORAGE_KEY_LAST_VISIT, visitorState.lastVisit);
         localStorage.setItem(VISITOR_CONFIG.STORAGE_KEY_VISIT_COUNT, visitorState.visitCount.toString());
+        
+        // Send data to API endpoint
+        await sendVisitorDataToAPI(visitorData);
         
         return {
             udid: visitorState.udid,
@@ -332,8 +508,13 @@ async function initVisitorTracking() {
     try {
         console.log('[Visitor Tracker] Initializing visitor tracking...');
         
+        // Try to process any pending queue items first
+        if (navigator.onLine) {
+            await processPendingQueue();
+        }
+        
         // Track the current visitor
-        const visitorData = trackVisitorUDID();
+        const visitorData = await trackVisitorUDID();
         
         if (visitorData) {
             console.log('[Visitor Tracker] Visitor tracked successfully:', visitorData);
@@ -351,6 +532,17 @@ async function initVisitorTracking() {
                 'Status': visitorData.isNewVisitor ? 'New Visitor' : 'Returning Visitor'
             });
         }
+        
+        // Set up periodic queue processing (every 5 minutes when online)
+        setInterval(async () => {
+            if (navigator.onLine) {
+                const queue = getPendingQueue();
+                if (queue.length > 0) {
+                    console.log('[Visitor Tracker] Auto-processing pending queue...');
+                    await processPendingQueue();
+                }
+            }
+        }, 5 * 60 * 1000); // 5 minutes
         
     } catch (error) {
         console.error('[Visitor Tracker] Error initializing tracking:', error);
@@ -427,7 +619,9 @@ window.visitorTracker = {
     getStats: getVisitorStats,
     exportJSON: exportVisitorsJSON,
     clearData: clearVisitorData,
-    trackVisitor: trackVisitorUDID
+    trackVisitor: trackVisitorUDID,
+    processPendingQueue: processPendingQueue,
+    getPendingQueue: getPendingQueue
 };
 
 // Add CSS styles for notifications
