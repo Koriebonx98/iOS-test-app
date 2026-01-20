@@ -1185,3 +1185,144 @@ function updateSaveButtonState() {
         savePlaylistButton.disabled = mediaPlaylist.length === 0;
     }
 }
+
+// CV and Cover Letter functionality
+let currentDocument = null;
+let currentDocumentType = null;
+
+// Get document elements
+const cvButton = document.getElementById('cvButton');
+const coverLetterButton = document.getElementById('coverLetterButton');
+const documentDisplay = document.getElementById('documentDisplay');
+const documentTitle = document.getElementById('documentTitle');
+const documentContent = document.getElementById('documentContent');
+const downloadButton = document.getElementById('downloadButton');
+const closeDocumentButton = document.getElementById('closeDocument');
+
+/**
+ * Fetch and display a document (CV or Cover Letter)
+ * @param {string} type - The type of document ('cv' or 'coverLetter')
+ */
+async function displayDocument(type) {
+    try {
+        let filename, title;
+        
+        if (type === 'cv') {
+            filename = 'cv.txt';
+            title = 'Curriculum Vitae';
+        } else if (type === 'coverLetter') {
+            filename = 'cover letter.txt';
+            title = 'Cover Letter';
+        } else {
+            return;
+        }
+        
+        // Fetch the document content
+        const response = await fetch(`./${filename}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load ${filename}: ${response.status}`);
+        }
+        
+        const content = await response.text();
+        
+        // Store current document info
+        currentDocument = content;
+        currentDocumentType = type;
+        
+        // Update the display
+        documentTitle.textContent = title;
+        documentContent.textContent = content;
+        
+        // Show the document display with animation
+        documentDisplay.style.display = 'block';
+        
+        // Scroll to document display
+        setTimeout(() => {
+            documentDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+        
+        console.log(`[Documents] Loaded ${title}`);
+    } catch (error) {
+        console.error(`[Documents] Error loading document:`, error);
+        alert(`Failed to load document. Please try again.`);
+    }
+}
+
+/**
+ * Close the document display
+ */
+function closeDocument() {
+    documentDisplay.style.display = 'none';
+    currentDocument = null;
+    currentDocumentType = null;
+}
+
+/**
+ * Download the currently displayed document
+ */
+function downloadDocument() {
+    if (!currentDocument || !currentDocumentType) {
+        return;
+    }
+    
+    let filename, mimeType;
+    
+    if (currentDocumentType === 'cv') {
+        filename = 'CV.txt';
+        mimeType = 'text/plain';
+    } else if (currentDocumentType === 'coverLetter') {
+        filename = 'Cover_Letter.txt';
+        mimeType = 'text/plain';
+    } else {
+        return;
+    }
+    
+    // Create a blob from the document content
+    const blob = new Blob([currentDocument], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary anchor element and trigger download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log(`[Documents] Downloaded ${filename}`);
+}
+
+// Event listeners for CV and Cover Letter buttons
+if (cvButton) {
+    cvButton.addEventListener('click', () => {
+        displayDocument('cv');
+        
+        // Optional: Haptic feedback
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(10);
+        }
+    });
+}
+
+if (coverLetterButton) {
+    coverLetterButton.addEventListener('click', () => {
+        displayDocument('coverLetter');
+        
+        // Optional: Haptic feedback
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(10);
+        }
+    });
+}
+
+if (closeDocumentButton) {
+    closeDocumentButton.addEventListener('click', closeDocument);
+}
+
+if (downloadButton) {
+    downloadButton.addEventListener('click', downloadDocument);
+}

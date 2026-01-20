@@ -1,0 +1,71 @@
+CURRICULUM VITAE
+
+Name: Korie
+Contact: koriegrant@icloud.com
+
+PROFESSIONAL SUMMARY
+UI-driven developer and systems designer with a focus on building console-style environments, developer tools, and secure, data-driven platforms. Specializes in crafting polished, responsive interfaces and OS-layer experiences that are cohesive, intuitive, and fast.
+
+CORE STRENGTHS
+• Front-end development (HTML, CSS, JavaScript)
+• UI/UX systems and responsive design
+• C#/WPF desktop application development
+• JSON-driven interfaces and data modelling
+• App ecosystems, launchers, and OS-layer environments
+• Secure, repo-based software distribution
+• Controller-driven navigation
+• Multi-platform design (Windows, Linux, macOS via Wine/Proton)
+• Rapid learning and iterative development
+
+KEY PROJECTS
+
+PS5 OS
+A complete OS-layer environment featuring:
+• Login screen and settings system
+• Quick menu and controller navigation
+• Plugin architecture
+• Auto-launch mode
+• Shell-replacement capability
+
+Game OS
+A Windows-based launcher and media/game manager with:
+• Drive-scanning logic
+• Custom UI components
+• Console-style UX
+
+AppStore
+A secure, JSON-driven software distribution platform:
+• Direct GitHub repository integration
+• Transparent, malware-resistant installation and updates
+• JSON-driven architecture
+
+iOS Test App
+A mobile-first web application serving as:
+• Interactive CV and portfolio
+• Live demonstration of UI and front-end capabilities
+• Progressive Web App (PWA)
+
+BBC iPlayer Desktop App
+Custom media playback environment with bespoke UI
+
+Playnite Tools
+Automation scripts, metadata utilities, and launcher integrations
+
+TECHNICAL APPROACH
+Throughout projects, emphasis is placed on:
+• UI/UX design excellence
+• System architecture
+• Multi-platform compatibility
+• Secure, transparent distribution
+• Modern development tools including AI-assisted workflows
+• Rapid prototyping and iteration
+• Full project direction, structure, and architecture
+
+PROFESSIONAL INTERESTS
+Passionate about building experiences that feel smooth, cohesive, and thoughtfully designed — whether it's a web interface, a desktop environment, or a full OS-layer system. Seeking opportunities to contribute to real products, collaborate with experienced developers, and continue growing as a front-end and platform engineer.
+
+ADDITIONAL INTERESTS
+• Music production
+• Data analysis
+• Coding and software engineering
+• Console and OS-layer design
