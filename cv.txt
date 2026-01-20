@@ -1,71 +1,80 @@
-CURRICULUM VITAE
+Korie Michael Joseph Grant
+Mobile: 07981 333712
+Email: koriegrant@icloud.com
+Address: Witney, Oxford
 
-Name: Korie
-Contact: koriegrant@icloud.com
+Personal Profile
+I am a dedicated and adaptable individual with strong problem-solving and technical skills. I thrive on learning new technologies, developing projects, and delivering solutions. My hands-on approach enables me to work effectively in a team or independently, while my strong communication skills allow me to engage with a wide range of audiences.
+Through my passion for software engineering and technology, I have developed several projects hosted on GitHub that demonstrate my abilities in coding, application design, and software development. I am eager to bring creativity and determination to new challenges and continue growing both personally and professionally.
 
-PROFESSIONAL SUMMARY
-UI-driven developer and systems designer with a focus on building console-style environments, developer tools, and secure, data-driven platforms. Specializes in crafting polished, responsive interfaces and OS-layer experiences that are cohesive, intuitive, and fast.
-
-CORE STRENGTHS
-• Front-end development (HTML, CSS, JavaScript)
-• UI/UX systems and responsive design
-• C#/WPF desktop application development
-• JSON-driven interfaces and data modelling
-• App ecosystems, launchers, and OS-layer environments
-• Secure, repo-based software distribution
-• Controller-driven navigation
-• Multi-platform design (Windows, Linux, macOS via Wine/Proton)
-• Rapid learning and iterative development
-
-KEY PROJECTS
-
-PS5 OS
-A complete OS-layer environment featuring:
-• Login screen and settings system
-• Quick menu and controller navigation
-• Plugin architecture
-• Auto-launch mode
-• Shell-replacement capability
-
-Game OS
-A Windows-based launcher and media/game manager with:
-• Drive-scanning logic
-• Custom UI components
-• Console-style UX
-
-AppStore
-A secure, JSON-driven software distribution platform:
-• Direct GitHub repository integration
-• Transparent, malware-resistant installation and updates
-• JSON-driven architecture
+GitHub Projects and Technical Accomplishments
 
 iOS Test App
-A mobile-first web application serving as:
-• Interactive CV and portfolio
-• Live demonstration of UI and front-end capabilities
-• Progressive Web App (PWA)
+- GitHub Repository: iOS Test App
+- Developed a responsive, lightweight web-based application optimized for iOS devices with a mobile-first design, clean interfaces, and improved performance.
 
-BBC iPlayer Desktop App
-Custom media playback environment with bespoke UI
+Game OS
+- Built a Windows desktop application using C# and XAML to organise media libraries, launch games, and provide custom console-like GUIs.
 
-Playnite Tools
-Automation scripts, metadata utilities, and launcher integrations
+PS5 OS
+- Designed a WPF application recreating the PS5 system interface, integrating Windows functionality for managing media, apps, and games.
 
-TECHNICAL APPROACH
-Throughout projects, emphasis is placed on:
-• UI/UX design excellence
-• System architecture
-• Multi-platform compatibility
-• Secure, transparent distribution
-• Modern development tools including AI-assisted workflows
-• Rapid prototyping and iteration
-• Full project direction, structure, and architecture
+AppStore
+- Developed a GitHub-backed storefront application for browsing and managing repositories, downloading code, and tracking updates; demonstrates backend skills and user-focused design.
 
-PROFESSIONAL INTERESTS
-Passionate about building experiences that feel smooth, cohesive, and thoughtfully designed — whether it's a web interface, a desktop environment, or a full OS-layer system. Seeking opportunities to contribute to real products, collaborate with experienced developers, and continue growing as a front-end and platform engineer.
+Skills Gained Across Projects
+- Programming: C#, Swift, HTML, CSS, JavaScript.
+- Frameworks: WPF, XAML.
+- Tools: GitHub version control, repository management, debugging techniques.
+- User-Centered Design: Creating clean, efficient, and functional user experiences.
 
-ADDITIONAL INTERESTS
-• Music production
-• Data analysis
-• Coding and software engineering
-• Console and OS-layer design
+Education
+- Severn Vale School, Gloucester (2009â2014)
+- Gloucester College, Cheltenham â Catering and Hospitality (2014â2015)
+- Gloucester College, Gloucester â Traineeship & Traineeship Plus (2014â2015)
+
+Qualifications
+Academic Grades
+- Maths: C
+- English: 2 x C
+- Science: 2 x C
+- ICT: C
+- D.T. Food: D
+
+Certificates and Additional Training
+- Work Skills Qualification: Level 2
+- Food Hygiene Certificate
+- Sports Leadership Certificate
+
+Skills Overview
+- Software Engineering: Programming, backend development, user interface design.
+- Communication: Clear, professional, and adaptable to different audiences.
+- Creativity and Problem Solving: Proactive approach to challenges and solution finding.
+- Organisational Skills: Streamlining workflows and attention to detail.
+- Quick Learner: Rapidly adapts to new tools and processes.
+
+Employment History
+I am currently unemployed and actively seeking opportunities where I can contribute my skills and experience.
+
+A Star Taxi, Gloucester Town â July 2022 to December 2025
+- Opened and maintained premises, ensuring a safe and clean environment for staff and customers.
+- Operated systems such as AutoCab and Phantom to manage taxi services effectively.
+- Resolved issues between drivers and customers and ensured accurate financial handling.
+
+Kingsholm Rugby Stadium â April 2022 to May 2022
+- Delivered high-quality customer service in a fast-paced stadium environment.
+- Collaborated with team members to meet company standards and customer needs.
+- Managed financial transactions and minimised errors.
+
+Josieâs Hot Pot â April to September 2015
+- Managed daily operations including customer orders, food preparation, and service.
+- Designed a budget tracker to optimise cafÃ© resources and reduce overspending.
+- Volunteered in weekly community outreach programmes serving food to elderly residents.
+
+Pizza Hut, Gloucester â June 2013
+- Gained early experience in time management, risk assessments, and customer relations.
+- Focused on stock control, food handling, and ensuring customer satisfaction.
+
+References
+- A Star Taxi: Jo â 07706 649811
+- Kingsholm Rugby Stadium: Initial Recruitment Services â 01452 740001
