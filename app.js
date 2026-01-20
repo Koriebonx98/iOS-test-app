@@ -202,11 +202,15 @@ async function loadVersionInfo() {
         console.log('[App] Manifest version:', manifestData.version);
         
         // Store version in localStorage for offline use
-        localStorage.setItem('appVersion', JSON.stringify({
-            version: versionData.version,
-            manifestVersion: manifestData.version,
-            lastChecked: new Date().toISOString()
-        }));
+        try {
+            localStorage.setItem('appVersion', JSON.stringify({
+                version: versionData.version,
+                manifestVersion: manifestData.version,
+                lastChecked: new Date().toISOString()
+            }));
+        } catch (storageError) {
+            console.warn('[App] Failed to cache version in localStorage:', storageError);
+        }
     } catch (error) {
         console.error('[App] Failed to load version info:', error);
         const versionInfo = document.getElementById('versionInfo');

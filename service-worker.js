@@ -217,6 +217,10 @@ async function checkForUpdates() {
 }
 
 // Update manifest.json with new version
+// Note: This updates the CACHED manifest only. The server-side manifest.json
+// should be updated manually or via deployment process to match version.json.
+// The cache update ensures consistency between version.json and manifest.json
+// in the service worker cache, which is what the PWA uses at runtime.
 async function updateManifestVersion(version) {
     try {
         // Fetch the current manifest
