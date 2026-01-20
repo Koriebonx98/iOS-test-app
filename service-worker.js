@@ -1,4 +1,5 @@
-const CACHE_NAME = 'ios-test-app-cache-v1.0.3';
+// Cache name will be set dynamically based on version.json
+let CACHE_NAME = 'ios-test-app-cache-v1.0.6'; // Initial default, will be updated
 const VERSION_FILE = './version.json';
 const STATIC_ASSETS = [
     './',
@@ -6,7 +7,9 @@ const STATIC_ASSETS = [
     './styles.css',
     './app.js',
     './manifest.json',
-    './version.json'
+    './version.json',
+    './cv.txt',
+    './cover letter.txt'
 ];
 
 // Check for updates every 5 minutes
@@ -18,10 +21,23 @@ let updateCheckTimer = null;
 self.addEventListener('install', (event) => {
     console.log('[Service Worker] Installing new version');
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
+        (async () => {
+            // Fetch version.json to get the current version
+            try {
+                const response = await fetch(VERSION_FILE, { cache: 'no-cache' });
+                if (response.ok) {
+                    const versionData = await response.json();
+                    CACHE_NAME = `ios-test-app-cache-v${versionData.version}`;
+                    console.log('[Service Worker] Using cache name:', CACHE_NAME);
+                }
+            } catch (error) {
+                console.warn('[Service Worker] Failed to fetch version, using default cache name:', error);
+            }
+            
+            const cache = await caches.open(CACHE_NAME);
             console.log('[Service Worker] Pre-caching offline data');
-            return cache.addAll(STATIC_ASSETS);
-        })
+            await cache.addAll(STATIC_ASSETS);
+        })()
     );
     // Force the waiting service worker to become the active service worker
     self.skipWaiting();
@@ -37,6 +53,26 @@ self.addEventListener('fetch', (event) => {
                     const responseToCache = response.clone();
                     // Note: Cache update is intentionally not awaited (fire-and-forget pattern)
                     // to avoid delaying the response. This is standard practice in service workers.
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
+                    return response;
+                })
+                .catch(() => {
+                    // If network fails, try to return cached version
+                    return caches.match(event.request);
+                })
+        );
+        return;
+    }
+
+    // Use network-first strategy for cv.txt and cover letter.txt to ensure latest content
+    if (event.request.url.includes('cv.txt') || event.request.url.includes('cover letter.txt')) {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    // Clone the response to store it in cache
+                    const responseToCache = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put(event.request, responseToCache);
                     });
@@ -192,6 +228,28 @@ async function checkForUpdates() {
             // Compare versions
             if (newVersion.version !== cachedVersion.version) {
                 console.log('[Service Worker] New version available:', newVersion.version);
+                console.log('[Service Worker] Current version:', cachedVersion.version);
+                
+                // Clear all old caches when version changes
+                const cacheNames = await caches.keys();
+                const newCacheName = `ios-test-app-cache-v${newVersion.version}`;
+                
+                await Promise.all(
+                    cacheNames.map((cacheName) => {
+                        if (cacheName !== newCacheName) {
+                            console.log('[Service Worker] Deleting old cache:', cacheName);
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+                
+                // Update cache name for future operations
+                CACHE_NAME = newCacheName;
+                
+                // Pre-cache all assets with new version
+                const newCache = await caches.open(CACHE_NAME);
+                console.log('[Service Worker] Pre-caching assets for new version');
+                await newCache.addAll(STATIC_ASSETS);
                 
                 // Update manifest.json with new version
                 await updateManifestVersion(newVersion.version);
