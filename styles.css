@@ -1146,3 +1146,105 @@ footer p {
         font-size: 0.95rem;
     }
 }
+
+/* Audience Counter Styles */
+.audience-counter-display {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.audience-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.audience-icon {
+    font-size: 2.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.audience-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.audience-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.audience-count-number {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.audience-hint {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin: 0;
+    text-align: center;
+}
+
+/* Audience notification animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Responsive adjustments for audience counter */
+@media (max-width: 480px) {
+    .audience-counter-display {
+        padding: 15px;
+    }
+    
+    .audience-icon {
+        font-size: 2rem;
+    }
+    
+    .audience-count-number {
+        font-size: 1.5rem;
+    }
+    
+    .audience-label {
+        font-size: 0.85rem;
+    }
+    
+    .audience-hint {
+        font-size: 0.75rem;
+    }
+}

@@ -9,6 +9,8 @@
     <title>iOS Test App</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
+    <!-- CryptoJS library for encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
     <div class="container">
@@ -116,6 +118,16 @@
 
             <section class="card">
                 <h2>Quick Links</h2>
+                <div class="audience-counter-display">
+                    <div class="audience-info">
+                        <span class="audience-icon">👥</span>
+                        <div class="audience-details">
+                            <span class="audience-label">Live Audience</span>
+                            <span class="audience-count-number" id="audienceCount">0</span>
+                        </div>
+                    </div>
+                    <p class="audience-hint">Unique visitors tracked securely</p>
+                </div>
                 <div class="button-container">
                     <button id="appStoreButton" class="quick-link-button">
                         <span class="button-icon">🏪</span>
@@ -233,6 +245,7 @@
         </footer>
     </div>
 
+    <script src="audience-counter.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

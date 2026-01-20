@@ -158,6 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check for updates
             checkForAppUpdates();
             
+            // Also refresh audience count if available
+            if (window.audienceCounter && typeof window.audienceCounter.refresh === 'function') {
+                window.audienceCounter.refresh();
+            }
+            
             // Re-enable button after a delay
             setTimeout(() => {
                 checkUpdateButton.textContent = 'Check Now';
