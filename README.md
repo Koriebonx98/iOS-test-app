@@ -11,6 +11,15 @@ Test web app for iOS with YouTube search functionality.
 - 🎨 Modern, clean interface  
 - ⚡ Fast and lightweight
 - ✨ iOS optimized
+- 🔖 **Visitor Tracking** - Anonymous visitor tracking using UDIDs:
+  - UDID-based unique visitor identification
+  - localStorage persistence for returning visitors
+  - Automatic tracking on every page visit
+  - Privacy-focused (only anonymous UDIDs tracked)
+  - Client-side data storage (no server required)
+  - Visit count and timestamp tracking
+  - User notification about tracking
+  - Detailed visitor statistics in console
 - 👥 **Live Audience Counter** - Real-time tracking of unique visitors:
   - UUID-based unique user identification
   - localStorage persistence (same device counted once)
@@ -117,6 +126,63 @@ The app includes an intelligent auto-update mechanism that keeps all users on th
 ### Device Information
 - Real-time display of user agent, screen size, and time
 - Responsive to orientation changes
+
+### Visitor Tracking
+The app includes a client-side visitor tracking system that monitors unique visitors anonymously:
+
+**How it works:**
+- **Unique Identification**: Each visitor receives a UDID (Unique Device Identifier) on their first visit, stored in localStorage
+- **Privacy First**: Only anonymous UDIDs are tracked - no personal information is collected
+- **Automatic Tracking**: Every page visit is automatically tracked and logged
+- **Returning Visitors**: Returning visitors are recognized by their stored UDID, and their visit count is updated
+- **Client-Side Storage**: All visitor data is stored in localStorage (simulating `visitors.json`)
+- **User Notification**: Visitors are notified about tracking via a friendly notification message
+- **Detailed Logging**: All tracking activity is logged to the browser console for transparency
+
+**Visitor Data Tracked:**
+- UDID (Unique Device Identifier)
+- First visit timestamp
+- Last visit timestamp
+- Visit count
+- User agent
+- Screen size
+- Language preference
+- Platform
+- Time zone
+
+**How `visitors.json` Works:**
+Since browsers cannot directly write to files for security reasons, visitor data is stored in localStorage under the key `visitors_data`. This simulates the `visitors.json` file mentioned in the requirements. The data structure is identical to what would be stored in a JSON file:
+
+```json
+[
+  {
+    "udid": "550e8400-e29b-41d4-a716-446655440000",
+    "firstVisit": "2026-01-20T20:00:00.000Z",
+    "lastVisit": "2026-01-20T20:30:00.000Z",
+    "visitCount": 3,
+    "userAgent": "Mozilla/5.0...",
+    "screenSize": "1920x1080",
+    "language": "en-US",
+    "platform": "MacIntel",
+    "timeZone": "America/New_York"
+  }
+]
+```
+
+**For Developers:**
+- Check the browser console to see detailed visitor tracking logs
+- Use `window.visitorTracker.getStats()` in the console to get current visitor statistics
+- Use `window.visitorTracker.exportJSON()` to export all visitor data as JSON
+- Use `window.visitorTracker.clearData()` to clear all visitor tracking data
+- The tracking module is in `visitor-tracker.js`
+
+**Privacy Features:**
+- ✅ No personal information collected
+- ✅ Anonymous UDID tracking only
+- ✅ Transparent logging in console
+- ✅ User notification about tracking
+- ✅ Easy data clearing option
+- ✅ No external servers or third-party tracking
 
 ### Live Audience Counter
 The app includes a sophisticated audience tracking system that demonstrates modern web development practices:
