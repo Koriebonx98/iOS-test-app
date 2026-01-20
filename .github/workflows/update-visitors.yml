@@ -1,0 +1,81 @@
+name: Update Visitors Data
+
+on:
+  repository_dispatch:
+    types: [update-visitor]
+
+jobs:
+  update-visitors:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update visitors.json
+        run: |
+          echo "Received visitor data:"
+          echo "${{ toJson(github.event.client_payload) }}"
+          
+          # Update visitors.json using Node.js
+          node << 'SCRIPT'
+          const fs = require('fs');
+          
+          const visitorsFile = 'visitors.json';
+          const visitorData = {
+            udid: "${{ github.event.client_payload.udid }}",
+            firstVisit: "${{ github.event.client_payload.firstVisit }}",
+            lastVisit: "${{ github.event.client_payload.lastVisit }}",
+            visitCount: parseInt("${{ github.event.client_payload.visitCount }}" || '1'),
+            userAgent: "${{ github.event.client_payload.userAgent }}",
+            screenSize: "${{ github.event.client_payload.screenSize }}",
+            language: "${{ github.event.client_payload.language }}",
+            platform: "${{ github.event.client_payload.platform }}",
+            timeZone: "${{ github.event.client_payload.timeZone }}",
+            lastUpdated: new Date().toISOString()
+          };
+          
+          // Read existing visitors data
+          let visitors = [];
+          if (fs.existsSync(visitorsFile)) {
+            const fileContent = fs.readFileSync(visitorsFile, 'utf8');
+            visitors = JSON.parse(fileContent);
+          }
+          
+          // Find existing visitor or add new one
+          const existingIndex = visitors.findIndex(v => v.udid === visitorData.udid);
+          
+          if (existingIndex !== -1) {
+            // Update existing visitor
+            visitors[existingIndex] = { ...visitors[existingIndex], ...visitorData };
+            console.log("Updated existing visitor: " + visitorData.udid);
+          } else {
+            // Add new visitor
+            visitors.push(visitorData);
+            console.log("Added new visitor: " + visitorData.udid);
+          }
+          
+          // Write updated data back to file
+          fs.writeFileSync(visitorsFile, JSON.stringify(visitors, null, 2));
+          console.log("Total visitors: " + visitors.length);
+          SCRIPT
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "Visitor Tracker Bot"
+          git config user.email "visitor-tracker@github-actions.bot"
+          git add visitors.json
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            UDID_SHORT="${{ github.event.client_payload.udid }}"
+            UDID_SHORT="${UDID_SHORT:0:8}"
+            git commit -m "Update visitor: ${UDID_SHORT}... (visit #${{ github.event.client_payload.visitCount }})"
+            git push
+            echo "✅ visitors.json updated successfully"
+          fi
