@@ -32,6 +32,8 @@ const VISITOR_CONFIG = {
     MAX_RETRIES: 3,
     RETRY_DELAY: 2000, // 2 seconds
     REQUEST_TIMEOUT: 10000, // 10 seconds
+    MAX_QUEUE_RETRIES: 10, // Maximum retries for queued items
+    QUEUE_PROCESSING_INTERVAL: 5 * 60 * 1000, // 5 minutes
     
     // Notification settings
     SHOW_NOTIFICATION: true,
@@ -206,24 +208,28 @@ async function sendVisitorDataToAPI(visitorData, retryCount = 0) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), VISITOR_CONFIG.REQUEST_TIMEOUT);
         
-        const response = await fetch(VISITOR_CONFIG.API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(visitorData),
-            signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+            const response = await fetch(VISITOR_CONFIG.API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(visitorData),
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log('[Visitor Tracker] Successfully sent visitor data to API:', result);
+            return true;
+        } finally {
+            clearTimeout(timeoutId);
         }
-        
-        const result = await response.json();
-        console.log('[Visitor Tracker] Successfully sent visitor data to API:', result);
-        return true;
         
     } catch (error) {
         console.error(`[Visitor Tracker] Error sending visitor data (attempt ${retryCount + 1}):`, error.message);
@@ -269,7 +275,7 @@ async function processPendingQueue() {
                 item.retries = (item.retries || 0) + 1;
                 
                 // Remove from queue if too many retries (prevent infinite queue growth)
-                if (item.retries < 10) {
+                if (item.retries < VISITOR_CONFIG.MAX_QUEUE_RETRIES) {
                     remainingQueue.push(item);
                 } else {
                     console.warn('[Visitor Tracker] Dropping item from queue after too many retries:', item.data.udid);
@@ -542,7 +548,7 @@ async function initVisitorTracking() {
                     await processPendingQueue();
                 }
             }
-        }, 5 * 60 * 1000); // 5 minutes
+        }, VISITOR_CONFIG.QUEUE_PROCESSING_INTERVAL);
         
     } catch (error) {
         console.error('[Visitor Tracker] Error initializing tracking:', error);

@@ -61,7 +61,7 @@ Accepts visitor data and stores it in `visitors.json`.
   "udid": "string",
   "firstVisit": "ISO 8601 timestamp",
   "lastVisit": "ISO 8601 timestamp",
-  "visitCount": "number",
+  "visitCount": 1,
   "userAgent": "string",
   "screenSize": "string",
   "language": "string",

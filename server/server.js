@@ -318,6 +318,38 @@ async function saveVisitorsData(visitors) {
 }
 
 /**
+ * Validate UDID format (UUID v4)
+ * @param {string} udid - UDID to validate
+ * @returns {boolean} True if valid UUID format
+ */
+function isValidUDID(udid) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return typeof udid === 'string' && uuidRegex.test(udid);
+}
+
+/**
+ * Validate ISO 8601 timestamp
+ * @param {string} timestamp - Timestamp to validate
+ * @returns {boolean} True if valid ISO 8601 format
+ */
+function isValidTimestamp(timestamp) {
+    if (typeof timestamp !== 'string') return false;
+    const date = new Date(timestamp);
+    return date instanceof Date && !isNaN(date) && date.toISOString() === timestamp;
+}
+
+/**
+ * Sanitize string input
+ * @param {string} input - Input to sanitize
+ * @param {number} maxLength - Maximum length
+ * @returns {string} Sanitized string
+ */
+function sanitizeString(input, maxLength = 500) {
+    if (typeof input !== 'string') return '';
+    return input.slice(0, maxLength).trim();
+}
+
+/**
  * POST /track
  * Track a visitor with comprehensive data
  * 
@@ -347,33 +379,64 @@ app.post('/track', async (req, res) => {
             });
         }
         
-        console.log('[Track Visitor] Received visitor data:', {
+        // Validate UDID format
+        if (!isValidUDID(visitorData.udid)) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Bad Request', 
+                message: 'Invalid UDID format (must be UUID v4)' 
+            });
+        }
+        
+        // Validate timestamp formats
+        if (!isValidTimestamp(visitorData.firstVisit) || !isValidTimestamp(visitorData.lastVisit)) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Bad Request', 
+                message: 'Invalid timestamp format (must be ISO 8601)' 
+            });
+        }
+        
+        // Sanitize string fields
+        const sanitizedData = {
             udid: visitorData.udid,
-            visitCount: visitorData.visitCount,
-            isNew: !visitorData.visitCount || visitorData.visitCount === 1
+            firstVisit: visitorData.firstVisit,
+            lastVisit: visitorData.lastVisit,
+            visitCount: parseInt(visitorData.visitCount) || 1,
+            userAgent: sanitizeString(visitorData.userAgent, 500),
+            screenSize: sanitizeString(visitorData.screenSize, 50),
+            language: sanitizeString(visitorData.language, 20),
+            platform: sanitizeString(visitorData.platform, 100),
+            timeZone: sanitizeString(visitorData.timeZone, 100)
+        };
+        
+        console.log('[Track Visitor] Received visitor data:', {
+            udid: sanitizedData.udid,
+            visitCount: sanitizedData.visitCount,
+            isNew: !sanitizedData.visitCount || sanitizedData.visitCount === 1
         });
         
         // Load current visitors data
         const visitors = await loadVisitorsData();
         
         // Check if visitor already exists
-        const existingVisitorIndex = visitors.findIndex(v => v.udid === visitorData.udid);
+        const existingVisitorIndex = visitors.findIndex(v => v.udid === sanitizedData.udid);
         
         if (existingVisitorIndex !== -1) {
             // Update existing visitor record
             visitors[existingVisitorIndex] = {
                 ...visitors[existingVisitorIndex],
-                ...visitorData,
+                ...sanitizedData,
                 lastUpdated: new Date().toISOString()
             };
-            console.log('[Track Visitor] Updated existing visitor:', visitorData.udid);
+            console.log('[Track Visitor] Updated existing visitor:', sanitizedData.udid);
         } else {
             // Add new visitor
             visitors.push({
-                ...visitorData,
+                ...sanitizedData,
                 lastUpdated: new Date().toISOString()
             });
-            console.log('[Track Visitor] Added new visitor:', visitorData.udid);
+            console.log('[Track Visitor] Added new visitor:', sanitizedData.udid);
         }
         
         // Save updated data
