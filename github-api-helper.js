@@ -41,6 +41,9 @@ const GITHUB_CONFIG = {
     // File path to visitors.json in the repository
     VISITORS_FILE_PATH: 'visitors.json',
     
+    // File path to version.json in the repository
+    VERSION_FILE_PATH: 'version.json',
+    
     // API settings
     MAX_RETRIES: 3,
     RETRY_DELAY: 2000, // 2 seconds
@@ -356,6 +359,17 @@ async function updateVisitorInGitHub(visitorData) {
         // Fetch updated visitors to get total count
         const visitors = await fetchVisitorsFromGitHub();
         
+        // Auto-increment version after successful visitor update
+        try {
+            console.log('[GitHub API] Auto-incrementing version after visitor update...');
+            const versionResult = await updateVersionInGitHub('Visitor data updated');
+            console.log(`[GitHub API] Version auto-incremented to: ${versionResult.newVersion}`);
+        } catch (versionError) {
+            // Log error but don't fail the visitor update
+            console.error('[GitHub API] Failed to auto-increment version:', versionError);
+            console.warn('[GitHub API] Visitor data was updated successfully, but version increment failed');
+        }
+        
         return {
             success: result.success,
             totalVisitors: visitors.length
@@ -382,6 +396,118 @@ async function getVisitorCountFromGitHub() {
     }
 }
 
+/**
+ * Increment version number (semantic versioning)
+ * 
+ * @param {string} version - Current version (e.g., "1.0.9")
+ * @returns {string} Incremented version (e.g., "1.0.10")
+ */
+function incrementVersion(version) {
+    try {
+        const parts = version.split('.');
+        if (parts.length !== 3) {
+            console.warn('[GitHub API] Invalid version format, using default increment');
+            return version;
+        }
+        
+        // Increment patch version
+        const major = parseInt(parts[0], 10);
+        const minor = parseInt(parts[1], 10);
+        const patch = parseInt(parts[2], 10);
+        
+        return `${major}.${minor}.${patch + 1}`;
+    } catch (error) {
+        console.error('[GitHub API] Error incrementing version:', error);
+        return version;
+    }
+}
+
+/**
+ * Fetch version data from GitHub repository
+ * 
+ * @returns {Promise<{version: string, buildDate: string, description: string}>} Version data
+ */
+async function fetchVersionFromGitHub() {
+    try {
+        const { content } = await fetchFileFromGitHub(GITHUB_CONFIG.VERSION_FILE_PATH);
+        const versionData = JSON.parse(content);
+        
+        console.log(`[GitHub API] Fetched version: ${versionData.version}`);
+        return versionData;
+    } catch (error) {
+        console.error('[GitHub API] Error fetching version:', error);
+        // Return default version if fetch fails
+        return {
+            version: '1.0.0',
+            buildDate: new Date().toISOString().split('T')[0],
+            description: 'Default version'
+        };
+    }
+}
+
+/**
+ * Update version in GitHub repository
+ * Auto-increments version and updates build date
+ * 
+ * @param {string} reason - Reason for version update (e.g., "Visitor data update")
+ * @returns {Promise<{success: boolean, newVersion: string}>} Update result
+ */
+async function updateVersionInGitHub(reason = 'Visitor data update') {
+    try {
+        const updateFn = (currentVersionData) => {
+            // Parse current version
+            let versionData;
+            try {
+                versionData = currentVersionData;
+            } catch (error) {
+                console.warn('[GitHub API] Invalid version.json, creating new one');
+                versionData = {
+                    version: '1.0.0',
+                    buildDate: new Date().toISOString().split('T')[0],
+                    description: 'Initial version'
+                };
+            }
+            
+            // Increment version
+            const newVersion = incrementVersion(versionData.version);
+            
+            // Update build date to current date (YYYY-MM-DD format)
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Update description
+            const newDescription = `Auto-update: ${reason}`;
+            
+            return {
+                version: newVersion,
+                buildDate: today,
+                description: newDescription
+            };
+        };
+        
+        const commitMessage = `Auto-increment version: ${reason}`;
+        
+        const result = await updateFileWithRetry(
+            GITHUB_CONFIG.VERSION_FILE_PATH,
+            updateFn,
+            commitMessage
+        );
+        
+        // Fetch updated version to get the new version number
+        const versionData = await fetchVersionFromGitHub();
+        
+        console.log(`[GitHub API] Version updated to: ${versionData.version}`);
+        
+        return {
+            success: result.success,
+            newVersion: versionData.version
+        };
+        
+    } catch (error) {
+        console.error('[GitHub API] Error updating version:', error);
+        throw error;
+    }
+}
+
 // Export functions for use in other modules
 window.githubAPI = {
     fetchFile: fetchFileFromGitHub,
@@ -390,6 +516,8 @@ window.githubAPI = {
     fetchVisitors: fetchVisitorsFromGitHub,
     updateVisitor: updateVisitorInGitHub,
     getVisitorCount: getVisitorCountFromGitHub,
+    fetchVersion: fetchVersionFromGitHub,
+    updateVersion: updateVersionInGitHub,
     config: GITHUB_CONFIG
 };
 
