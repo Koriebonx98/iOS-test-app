@@ -1,1 +1,5 @@
-{"version": "1.0.3", "buildDate": "2026-01-20T00:00:00.000Z", "description": "Update to version 1.0.3 for testing on web and app"}
+{
+  "version": "1.0.4",
+  "buildDate": "2026-01-20T12:00:00.000Z",
+  "description": "Update to version 1.0.4 for further testing to validate update detection logic."
+}
