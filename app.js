@@ -318,7 +318,7 @@ function showUpdateNotification(newWorker) {
 }
 
 // Show version update notification when version.json changes
-function showVersionUpdateNotification(newVersion, oldVersion) {
+function showVersionUpdateNotification(newVersion, oldVersion, description) {
     // Prevent multiple notifications
     if (appNotificationState.versionUpdateNotificationShown) {
         return;
@@ -326,16 +326,18 @@ function showVersionUpdateNotification(newVersion, oldVersion) {
     appNotificationState.versionUpdateNotificationShown = true;
     
     const notification = document.createElement('div');
-    notification.className = 'update-notification';
+    notification.className = 'update-notification urgent';
     notification.innerHTML = `
         <div class="update-content">
             <div class="update-icon">✨</div>
             <div class="update-text">
-                <strong>New Version Available!</strong>
+                <strong>🎉 New Version Available!</strong>
                 <p>Version ${newVersion} is now available (current: ${oldVersion})</p>
+                ${description ? `<p class="update-description">${description}</p>` : ''}
+                <p class="update-hint">⏱️ Auto-reloading in 5 seconds to apply update...</p>
             </div>
-            <button class="update-button" id="versionUpdateButton">Refresh</button>
-            <button class="update-dismiss" id="dismissVersionUpdate">Later</button>
+            <button class="update-button" id="versionUpdateButton">Update Now</button>
+            <button class="update-dismiss" id="dismissVersionUpdate">Cancel</button>
         </div>
     `;
     
@@ -346,19 +348,28 @@ function showVersionUpdateNotification(newVersion, oldVersion) {
         notification.classList.add('show');
     }, 100);
     
+    // Set auto-reload timer
+    const autoReloadTimer = setTimeout(() => {
+        console.log('[App] 🔄 Auto-reloading to apply update...');
+        window.location.reload(true);
+    }, 5000);
+    
     // Handle refresh button click
     document.getElementById('versionUpdateButton').addEventListener('click', () => {
+        clearTimeout(autoReloadTimer);
         notification.classList.remove('show');
         setTimeout(() => {
             notification.remove();
         }, 300);
         
-        // Reload the page to get the latest version
-        window.location.reload();
+        // Force reload with cache bypass
+        console.log('[App] 🔄 User requested update - force reloading...');
+        window.location.reload(true);
     });
     
     // Handle dismiss button click
     document.getElementById('dismissVersionUpdate').addEventListener('click', () => {
+        clearTimeout(autoReloadTimer);
         notification.classList.remove('show');
         setTimeout(() => {
             notification.remove();
@@ -391,28 +402,53 @@ if ('serviceWorker' in navigator) {
                     });
                 });
                 
-                // Check for updates periodically (every 5 minutes)
+                // Check for updates more frequently (every 2 minutes) to ensure all devices get updates quickly
                 setInterval(() => {
-                    console.log('[App] Checking for updates...');
+                    console.log('[App] Auto-checking for updates...');
                     reg.update();
-                }, 5 * 60 * 1000);
+                }, 2 * 60 * 1000);
             })
             .catch(err => console.log('[Service Worker] Registration failed', err));
         
         // Listen for messages from service worker
         navigator.serviceWorker.addEventListener('message', (event) => {
             if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
-                console.log('[App] Update available:', event.data.version);
-                showVersionUpdateNotification(event.data.version, event.data.oldVersion);
+                console.log('[App] 🎉 Update available:', event.data.version);
+                console.log('[App] 📝 Update description:', event.data.description);
+                
+                // Show notification with auto-reload option
+                showVersionUpdateNotification(
+                    event.data.version, 
+                    event.data.oldVersion,
+                    event.data.description
+                );
             }
         });
         
         // Handle controller change (when new service worker takes over)
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-            console.log('[App] New service worker activated');
-            // Optionally reload the page to use the new service worker
-            if (!appNotificationState.updateNotificationShown) {
-                window.location.reload();
+            console.log('[App] 🔄 New service worker activated - reloading page');
+            // Always reload when controller changes to ensure latest version
+            window.location.reload();
+        });
+        
+        // Check for updates when page becomes visible (user switches back to tab)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && 'serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                console.log('[App] Page visible - checking for updates');
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'CHECK_FOR_UPDATES'
+                });
+            }
+        });
+        
+        // Check for updates when connection is restored
+        window.addEventListener('online', () => {
+            console.log('[App] Connection restored - checking for updates');
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'CHECK_FOR_UPDATES'
+                });
             }
         });
     });

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.8",
+  "version": "1.0.9",
   "buildDate": "2026-01-20",
-  "description": "Version 1.0.8: Updated version references across all relevant files for the new release."
+  "description": "Enhanced auto-update system: Updates now propagate to all devices within 2 minutes. Added GitHub API visitor tracking without backend server."
 }

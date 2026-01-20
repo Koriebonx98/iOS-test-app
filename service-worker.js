@@ -6,14 +6,17 @@ const STATIC_ASSETS = [
     './index.html',
     './styles.css',
     './app.js',
+    './visitor-tracker.js',
+    './audience-counter.js',
+    './github-api-helper.js',
     './manifest.json',
     './version.json',
     './cv.txt',
     './cover letter.txt'
 ];
 
-// Check for updates every 5 minutes
-const UPDATE_CHECK_INTERVAL = 5 * 60 * 1000;
+// Check for updates every 2 minutes (more aggressive)
+const UPDATE_CHECK_INTERVAL = 2 * 60 * 1000;
 
 // Periodic update checking timer
 let updateCheckTimer = null;
@@ -207,8 +210,14 @@ self.addEventListener('message', (event) => {
 // Check for updates by fetching version.json
 async function checkForUpdates() {
     try {
+        console.log('[Service Worker] Checking for updates...');
+        
         const response = await fetch(VERSION_FILE, {
-            cache: 'no-cache'
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
+            }
         });
         
         if (!response.ok) {
@@ -227,8 +236,8 @@ async function checkForUpdates() {
             
             // Compare versions
             if (newVersion.version !== cachedVersion.version) {
-                console.log('[Service Worker] New version available:', newVersion.version);
-                console.log('[Service Worker] Current version:', cachedVersion.version);
+                console.log('[Service Worker] 🎉 New version available:', newVersion.version);
+                console.log('[Service Worker] 📦 Current version:', cachedVersion.version);
                 
                 // Clear all old caches when version changes
                 const cacheNames = await caches.keys();
@@ -238,7 +247,7 @@ async function checkForUpdates() {
                     cacheNames
                         .filter((cacheName) => cacheName !== newCacheName)
                         .map((cacheName) => {
-                            console.log('[Service Worker] Deleting old cache:', cacheName);
+                            console.log('[Service Worker] 🗑️ Deleting old cache:', cacheName);
                             return caches.delete(cacheName);
                         })
                 );
@@ -248,30 +257,43 @@ async function checkForUpdates() {
                 
                 // Pre-cache all assets with new version
                 const newCache = await caches.open(CACHE_NAME);
-                console.log('[Service Worker] Pre-caching assets for new version');
-                await newCache.addAll(STATIC_ASSETS);
+                console.log('[Service Worker] 📥 Pre-caching assets for new version');
+                try {
+                    await newCache.addAll(STATIC_ASSETS);
+                } catch (cacheError) {
+                    console.warn('[Service Worker] Some assets failed to cache, will retry on demand:', cacheError);
+                }
                 
                 // Update manifest.json with new version
                 await updateManifestVersion(newVersion.version);
                 
                 // Notify all clients about the update
-                const clients = await self.clients.matchAll();
+                const clients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+                console.log(`[Service Worker] 📢 Notifying ${clients.length} client(s) about update`);
+                
                 clients.forEach(client => {
                     client.postMessage({
                         type: 'UPDATE_AVAILABLE',
                         version: newVersion.version,
-                        oldVersion: cachedVersion.version
+                        oldVersion: cachedVersion.version,
+                        description: newVersion.description || 'New version available'
                     });
                 });
+                
+                // Note: Auto-reload is handled by client-side app.js to ensure proper timing
+                // Service worker skipWaiting() is called when user clicks "Update Now" or after timer
             } else {
-                console.log('[Service Worker] App is up to date:', cachedVersion.version);
+                console.log('[Service Worker] ✅ App is up to date:', cachedVersion.version);
             }
+        } else {
+            // No cached version, this is first run
+            console.log('[Service Worker] 📝 First run, caching version:', newVersion.version);
         }
         
         // Update cached version
         await cache.put(VERSION_FILE, new Response(JSON.stringify(newVersion)));
     } catch (error) {
-        console.error('[Service Worker] Error checking for updates:', error);
+        console.error('[Service Worker] ❌ Error checking for updates:', error);
     }
 }
 

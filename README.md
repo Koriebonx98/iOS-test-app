@@ -128,15 +128,16 @@ The app includes an intelligent auto-update mechanism that keeps all users on th
 - Responsive to orientation changes
 
 ### Visitor Tracking
-The app includes a client-side visitor tracking system that monitors unique visitors anonymously and syncs with a backend server:
+The app includes a client-side visitor tracking system that monitors unique visitors anonymously and stores data directly in the GitHub repository (no backend server required):
 
 **How it works:**
+- **GitHub API Integration**: Visitor data is stored in `visitors.json` directly in the repository using GitHub's Contents API
 - **Unique Identification**: Each visitor receives a UDID (Unique Device Identifier) on their first visit, stored in localStorage
 - **Privacy First**: Only anonymous UDIDs are tracked - no personal information is collected
-- **Automatic Tracking**: Every page visit is automatically tracked and logged
-- **API Integration**: Visitor data is sent to a backend API endpoint for persistent storage
-- **Retry Logic**: Failed API requests are retried up to 3 times with exponential backoff
-- **Offline Queue**: When offline or API is unavailable, data is queued in localStorage and sent later
+- **Automatic Tracking**: Every page visit is automatically tracked and logged to the repository
+- **Concurrency Safe**: Uses GitHub's SHA-based updates to prevent conflicts when multiple visitors access simultaneously
+- **Retry Logic**: Failed updates are retried automatically with exponential backoff
+- **Offline Queue**: When offline or GitHub API is unavailable, data is queued in localStorage and synced later
 - **Returning Visitors**: Returning visitors are recognized by their stored UDID, and their visit count is updated
 - **User Notification**: Visitors are notified about tracking via a friendly notification message
 - **Detailed Logging**: All tracking activity is logged to the browser console for transparency
@@ -152,17 +153,18 @@ The app includes a client-side visitor tracking system that monitors unique visi
 - Platform
 - Time zone
 
-**Backend API Integration:**
-The visitor tracker now sends data to a backend API endpoint (configurable in `visitor-tracker.js`):
-- **Endpoint**: POST `/track` - Accepts visitor data and stores it in `visitors.json` on the server
-- **Retry Logic**: Up to 3 retry attempts with 2-second delays
+**GitHub API Integration:**
+The visitor tracker uses GitHub's Contents API to update `visitors.json` in the repository:
+- **Read**: GET `/repos/:owner/:repo/contents/visitors.json` - Fetches current visitor data
+- **Write**: PUT `/repos/:owner/:repo/contents/visitors.json` - Updates visitor data with new/updated records
+- **Concurrency Safety**: Uses file SHA to detect and prevent conflicts
+- **Automatic Retry**: Up to 3 retry attempts with exponential backoff on conflicts
 - **Offline Support**: Failed requests are queued and processed when connection is restored
-- **Auto-sync**: Pending queue is processed every 5 minutes automatically
 
-For API configuration and setup, see [VISITOR_TRACKER_API.md](VISITOR_TRACKER_API.md)
+For GitHub API configuration and setup, see [GITHUB_API_SETUP.md](GITHUB_API_SETUP.md)
 
 **How `visitors.json` Works:**
-Visitor data is stored both locally (in localStorage) and on the backend server (in `visitors.json`). The backend file serves as the authoritative source and is updated via the POST `/track` endpoint:
+Visitor data is stored both locally (in localStorage) and in the GitHub repository (in `visitors.json`). The repository file serves as the authoritative source and is updated via the GitHub Contents API:
 
 ```json
 [
@@ -188,8 +190,19 @@ Visitor data is stored both locally (in localStorage) and on the backend server 
 - Use `window.visitorTracker.clearData()` to clear all visitor tracking data
 - Use `window.visitorTracker.getPendingQueue()` to see queued items waiting to be sent
 - Use `window.visitorTracker.processPendingQueue()` to manually process the queue
+- Use `window.githubAPI.fetchVisitors()` to fetch visitors from GitHub repository
+- Use `window.githubAPI.getVisitorCount()` to get total visitor count
 - The tracking module is in `visitor-tracker.js`
-- Backend API server is in `server/server.js`
+- The GitHub API helper is in `github-api-helper.js`
+- Legacy backend API server is in `server/server.js` (optional, for backward compatibility)
+
+**Security Considerations:**
+- ⚠️ GitHub Personal Access Token is required for write access to the repository
+- ⚠️ Token will be visible in client-side code - consider using a serverless proxy for production
+- ✅ Uses SHA-based updates to prevent conflicts
+- ✅ Automatic retry logic with exponential backoff
+- ✅ Rate limiting handled by GitHub API (5,000 requests/hour with auth)
+- See [GITHUB_API_SETUP.md](GITHUB_API_SETUP.md) for security best practices
 
 **Privacy Features:**
 - ✅ No personal information collected
@@ -197,22 +210,21 @@ Visitor data is stored both locally (in localStorage) and on the backend server 
 - ✅ Transparent logging in console
 - ✅ User notification about tracking
 - ✅ Easy data clearing option
-- ✅ Secure backend API with CORS protection
+- ✅ Works without backend server (direct GitHub API integration)
 
 ### Live Audience Counter
-The app includes a sophisticated audience tracking system that demonstrates modern web development practices:
+The app includes a sophisticated audience tracking system that reads visitor count from the GitHub repository:
 
 **How it works:**
-- **Unique Identification**: Each visitor receives a UUID (Universally Unique Identifier) on their first visit, stored in localStorage
-- **Privacy First**: Only anonymous UUIDs are tracked - no personal information is collected
-- **Encrypted Communication**: All data transmitted between client and server is encrypted using AES-256 encryption
-- **Secure API**: Backend API requires authentication via API key to prevent unauthorized access
+- **GitHub Integration**: Fetches visitor count from `visitors.json` in the repository using GitHub API
 - **Real-time Updates**: Audience count refreshes automatically every 5 minutes and can be manually refreshed
+- **No Backend Required**: Works entirely with GitHub API (optional backend support available)
 - **Offline Support**: Gracefully handles offline scenarios without errors
+- **Privacy First**: Only displays count, no personal information is exposed
 
 **Technical Implementation:**
-- Frontend: Pure JavaScript with CryptoJS for encryption
-- Backend: Node.js with Express, featuring:
+- Frontend: Pure JavaScript with GitHub API integration
+- Backend: Optional Node.js with Express (for legacy support), featuring:
   - HTTPS/TLS support for secure connections
   - API key authentication
   - AES encryption for request/response payloads
@@ -220,7 +232,14 @@ The app includes a sophisticated audience tracking system that demonstrates mode
   - JSON file-based storage for audience data
 
 **For Developers:**
-See the `server/` directory for the backend implementation. The server is optional - the app works without it, but the audience counter will show 0. To set up your own tracking server:
+The GitHub API integration is the primary method. The backend server in the `server/` directory is optional for backward compatibility. To use GitHub API:
+
+1. Configure `github-api-helper.js` with your repository details
+2. Create a GitHub Personal Access Token (see [GITHUB_API_SETUP.md](GITHUB_API_SETUP.md))
+3. Update `GITHUB_TOKEN` in the configuration
+4. The app will automatically fetch visitor count from `visitors.json`
+
+To use the legacy backend server:
 
 1. Navigate to the `server` directory
 2. Install dependencies: `npm install`
@@ -228,11 +247,12 @@ See the `server/` directory for the backend implementation. The server is option
 4. Update `audience-counter.js` with your server URL and keys
 5. Start the server: `npm start`
 
-For detailed setup instructions, see `server/README.md`.
+For detailed setup instructions, see `server/README.md` or [GITHUB_API_SETUP.md](GITHUB_API_SETUP.md).
 
 **Security Features:**
-- ✅ AES-256 encryption for all data transmission
-- ✅ API key authentication
+- ✅ GitHub API with SHA-based concurrency control
+- ✅ Optional backend with AES-256 encryption
+- ✅ API key authentication (for backend)
 - ✅ HTTPS/TLS support
 - ✅ CORS protection
 - ✅ Input validation and sanitization
@@ -240,7 +260,8 @@ For detailed setup instructions, see `server/README.md`.
 
 This feature showcases skills in:
 - API development and integration
-- Encryption and security best practices
+- GitHub API usage and best practices
+- Concurrency handling
 - Real-time data handling
 - Privacy-focused design
 - Full-stack development
