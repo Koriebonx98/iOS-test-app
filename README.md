@@ -11,6 +11,14 @@ Test web app for iOS with YouTube search functionality.
 - 🎨 Modern, clean interface  
 - ⚡ Fast and lightweight
 - ✨ iOS optimized
+- 👥 **Live Audience Counter** - Real-time tracking of unique visitors:
+  - UUID-based unique user identification
+  - localStorage persistence (same device counted once)
+  - Encrypted data transmission (AES encryption)
+  - Secure API with authentication
+  - Real-time count updates every 5 minutes
+  - Manual refresh with "Check for Updates" button
+  - Privacy-focused (only anonymous UUID tracked)
 - 🔄 **Auto-Update System** - Automatic detection and installation of new versions:
   - Version tracking with `version.json`
   - Automatic update checks every 5 minutes when online
@@ -110,9 +118,55 @@ The app includes an intelligent auto-update mechanism that keeps all users on th
 - Real-time display of user agent, screen size, and time
 - Responsive to orientation changes
 
+### Live Audience Counter
+The app includes a sophisticated audience tracking system that demonstrates modern web development practices:
+
+**How it works:**
+- **Unique Identification**: Each visitor receives a UUID (Universally Unique Identifier) on their first visit, stored in localStorage
+- **Privacy First**: Only anonymous UUIDs are tracked - no personal information is collected
+- **Encrypted Communication**: All data transmitted between client and server is encrypted using AES-256 encryption
+- **Secure API**: Backend API requires authentication via API key to prevent unauthorized access
+- **Real-time Updates**: Audience count refreshes automatically every 5 minutes and can be manually refreshed
+- **Offline Support**: Gracefully handles offline scenarios without errors
+
+**Technical Implementation:**
+- Frontend: Pure JavaScript with CryptoJS for encryption
+- Backend: Node.js with Express, featuring:
+  - HTTPS/TLS support for secure connections
+  - API key authentication
+  - AES encryption for request/response payloads
+  - CORS configuration for cross-origin requests
+  - JSON file-based storage for audience data
+
+**For Developers:**
+See the `server/` directory for the backend implementation. The server is optional - the app works without it, but the audience counter will show 0. To set up your own tracking server:
+
+1. Navigate to the `server` directory
+2. Install dependencies: `npm install`
+3. Configure environment variables (copy `.env.example` to `.env`)
+4. Update `audience-counter.js` with your server URL and keys
+5. Start the server: `npm start`
+
+For detailed setup instructions, see `server/README.md`.
+
+**Security Features:**
+- ✅ AES-256 encryption for all data transmission
+- ✅ API key authentication
+- ✅ HTTPS/TLS support
+- ✅ CORS protection
+- ✅ Input validation and sanitization
+- ✅ No personal data collection
+
+This feature showcases skills in:
+- API development and integration
+- Encryption and security best practices
+- Real-time data handling
+- Privacy-focused design
+- Full-stack development
+
 ## Browser Compatibility
 
 - iOS Safari (optimized)
 - Chrome/Edge
 - Firefox
-- Any modern web browser 
+- Any modern web browser
