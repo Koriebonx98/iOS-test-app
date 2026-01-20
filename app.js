@@ -196,11 +196,15 @@ async function loadVersionInfo() {
         
         const versionInfo = document.getElementById('versionInfo');
         if (versionInfo) {
-            // Show both versions to verify synchronization
-            if (versionData.version === manifestData.version) {
-                versionInfo.textContent = `Version: ${versionData.version}`;
-            } else {
-                versionInfo.textContent = `Version: ${versionData.version} (Manifest: ${manifestData.version})`;
+            // Display the version to users
+            versionInfo.textContent = `Version: ${versionData.version}`;
+            
+            // Log version mismatch for debugging (if any)
+            if (versionData.version !== manifestData.version) {
+                console.warn('[App] Version mismatch detected:', {
+                    versionJson: versionData.version,
+                    manifestJson: manifestData.version
+                });
             }
         }
         

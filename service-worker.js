@@ -220,14 +220,15 @@ async function checkForUpdates() {
     }
 }
 
-// Update manifest.json with new version
-// Note: This updates the CACHED manifest only. The server-side manifest.json
-// should be updated manually or via deployment process to match version.json.
-// The cache update ensures consistency between version.json and manifest.json
-// in the service worker cache, which is what the PWA uses at runtime.
+// Update manifest.json cached version to match version.json
+// This function fetches the latest manifest from the server (to get all current fields),
+// updates only the version field to match version.json, and caches the result.
+// This ensures the cached manifest (used by the PWA at runtime) has a consistent version.
+// Note: The server-side manifest.json should also be updated manually or via deployment
+// to keep the source of truth in sync, but this function ensures runtime consistency.
 async function updateManifestVersion(version) {
     try {
-        // Fetch the current manifest
+        // Fetch the latest manifest from server to use as base
         const manifestResponse = await fetch('./manifest.json', {
             cache: 'no-cache',
             headers: {
@@ -242,10 +243,10 @@ async function updateManifestVersion(version) {
         
         const manifest = await manifestResponse.json();
         
-        // Update the version in the manifest
+        // Update only the version field to match version.json
         manifest.version = version;
         
-        // Cache the updated manifest
+        // Store the updated manifest in cache
         const cache = await caches.open(CACHE_NAME);
         await cache.put('./manifest.json', new Response(JSON.stringify(manifest), {
             headers: {
@@ -253,7 +254,7 @@ async function updateManifestVersion(version) {
             }
         }));
         
-        console.log('[Service Worker] Updated manifest.json to version:', version);
+        console.log('[Service Worker] Updated cached manifest.json to version:', version);
     } catch (error) {
         console.error('[Service Worker] Error updating manifest:', error);
     }
