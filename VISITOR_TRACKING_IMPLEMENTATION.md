@@ -39,7 +39,7 @@ The system prevents duplicate visitor entries by:
 3. Incrementing `visitCount` for returning visitors
 4. Updating `lastVisit` timestamp
 
-**Code Reference** (visitor-tracker.js, line 365):
+**Code Reference** (visitor-tracker.js, function `trackVisitorUDID()`):
 ```javascript
 const existingVisitorIndex = visitors.findIndex(v => v.udid === udid);
 ```
