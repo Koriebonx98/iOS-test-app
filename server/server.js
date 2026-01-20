@@ -15,7 +15,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const fs = require('fs').promises;
 const path = require('path');
-const crypto = require('crypto');
 const CryptoJS = require('crypto-js');
 require('dotenv').config();
 

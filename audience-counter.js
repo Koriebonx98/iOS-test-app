@@ -15,18 +15,36 @@
 
 /**
  * Configuration
- * Update these values for your deployment
+ * IMPORTANT: Update these values for your deployment
+ * 
+ * Security Note: In production, these values should ideally be injected at build time
+ * or loaded from a secure configuration service. However, since this is a client-side
+ * application with no build process, they must be configured here.
+ * 
+ * The API key and encryption key provide security through:
+ * 1. Server-side validation (API key authentication)
+ * 2. End-to-end encryption (AES encryption of all payloads)
+ * 3. HTTPS/TLS for transport security
+ * 
+ * While these keys are visible in the client code, the security model relies on:
+ * - Server-side validation and rate limiting
+ * - Encrypted payloads that can't be forged without the encryption key
+ * - No sensitive data exposure (only anonymous UUIDs tracked)
  */
 const AUDIENCE_CONFIG = {
-    // Backend API URL - update this to your deployed server URL
+    // Backend API URL - update this to your deployed server URL with HTTPS
+    // Example: 'https://your-server.herokuapp.com/api/audience'
     API_URL: 'http://localhost:3000/api/audience',
     
-    // API key for authentication - should match server configuration
-    // In production, consider using environment-specific configuration
+    // API key for authentication - MUST match server configuration
+    // Generate a strong random key: openssl rand -base64 32
+    // This key authenticates requests to prevent unauthorized API access
     API_KEY: 'your-secure-api-key-here',
     
-    // Encryption key for AES encryption - should match server configuration
-    // Must be kept secret and match the server's ENCRYPTION_KEY
+    // Encryption key for AES encryption - MUST match server configuration
+    // Must be exactly 32 characters or a strong passphrase
+    // Generate: openssl rand -base64 24
+    // This key encrypts/decrypts all data payloads
     ENCRYPTION_KEY: 'your-32-character-encryption-key',
     
     // Update interval in milliseconds (5 minutes)
