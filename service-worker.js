@@ -48,6 +48,26 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Use network-first strategy for manifest.json to ensure latest version
+    if (event.request.url.includes('manifest.json')) {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    // Clone the response to store it in cache
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
+                    return response;
+                })
+                .catch(() => {
+                    // If network fails, try to return cached version
+                    return caches.match(event.request);
+                })
+        );
+        return;
+    }
+
     // Handle navigation requests specially to avoid 404 errors
     if (event.request.mode === 'navigate') {
         event.respondWith(

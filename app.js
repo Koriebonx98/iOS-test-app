@@ -180,20 +180,45 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load and display version information
 async function loadVersionInfo() {
     try {
-        const response = await fetch('./version.json');
-        const versionData = await response.json();
+        // Fetch version from version.json
+        const versionResponse = await fetch('./version.json');
+        const versionData = await versionResponse.json();
+        
+        // Fetch version from manifest.json
+        const manifestResponse = await fetch('./manifest.json');
+        const manifestData = await manifestResponse.json();
         
         const versionInfo = document.getElementById('versionInfo');
         if (versionInfo) {
-            versionInfo.textContent = `Version: ${versionData.version}`;
+            // Show both versions to verify synchronization
+            if (versionData.version === manifestData.version) {
+                versionInfo.textContent = `Version: ${versionData.version}`;
+            } else {
+                versionInfo.textContent = `Version: ${versionData.version} (Manifest: ${manifestData.version})`;
+            }
         }
         
         console.log('[App] Current version:', versionData.version);
+        console.log('[App] Manifest version:', manifestData.version);
+        
+        // Store version in localStorage for offline use
+        localStorage.setItem('appVersion', JSON.stringify({
+            version: versionData.version,
+            manifestVersion: manifestData.version,
+            lastChecked: new Date().toISOString()
+        }));
     } catch (error) {
         console.error('[App] Failed to load version info:', error);
         const versionInfo = document.getElementById('versionInfo');
         if (versionInfo) {
-            versionInfo.textContent = 'Version: Unknown';
+            // Try to load from localStorage if offline
+            const savedVersion = localStorage.getItem('appVersion');
+            if (savedVersion) {
+                const versionObj = JSON.parse(savedVersion);
+                versionInfo.textContent = `Version: ${versionObj.version} (Offline)`;
+            } else {
+                versionInfo.textContent = 'Version: Unknown';
+            }
         }
     }
 }
