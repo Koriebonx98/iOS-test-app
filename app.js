@@ -348,7 +348,11 @@ function showVersionUpdateNotification(newVersion, oldVersion, description) {
         notification.classList.add('show');
     }, 100);
     
-    let autoReloadTimer;
+    // Set auto-reload timer
+    const autoReloadTimer = setTimeout(() => {
+        console.log('[App] 🔄 Auto-reloading to apply update...');
+        window.location.reload(true);
+    }, 5000);
     
     // Handle refresh button click
     document.getElementById('versionUpdateButton').addEventListener('click', () => {
@@ -418,12 +422,6 @@ if ('serviceWorker' in navigator) {
                     event.data.oldVersion,
                     event.data.description
                 );
-                
-                // Auto-reload after showing notification for 5 seconds
-                setTimeout(() => {
-                    console.log('[App] 🔄 Auto-reloading to apply update...');
-                    window.location.reload();
-                }, 5000);
             }
         });
         

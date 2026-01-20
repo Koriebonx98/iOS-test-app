@@ -280,11 +280,8 @@ async function checkForUpdates() {
                     });
                 });
                 
-                // Force update after a delay to ensure all clients get notified
-                setTimeout(() => {
-                    console.log('[Service Worker] 🔄 Auto-applying update...');
-                    self.skipWaiting();
-                }, 3000); // 3 second delay to allow notifications to show
+                // Note: Auto-reload is handled by client-side app.js to ensure proper timing
+                // Service worker skipWaiting() is called when user clicks "Update Now" or after timer
             } else {
                 console.log('[Service Worker] ✅ App is up to date:', cachedVersion.version);
             }

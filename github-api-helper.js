@@ -89,8 +89,9 @@ async function githubAPIRequest(endpoint, options = {}) {
         
         clearTimeout(timeoutId);
         return response;
-    } finally {
+    } catch (error) {
         clearTimeout(timeoutId);
+        throw error;
     }
 }
 
@@ -277,8 +278,8 @@ async function updateFileWithRetry(filePath, updateFn, commitMessage, retryCount
     } catch (error) {
         console.error(`[GitHub API] Update attempt ${retryCount + 1} failed:`, error.message);
         
-        // Check if this is a conflict error (409) using status code
-        const isConflict = error.status === 409 || error.message.includes('409');
+        // Check if this is a conflict error (409) using status code only
+        const isConflict = error.status === 409;
         
         // Retry logic
         if (retryCount < GITHUB_CONFIG.MAX_RETRIES && isConflict) {
