@@ -135,7 +135,7 @@ function saveVisitorsData(visitors) {
  * 
  * @returns {Object} Visitor data object
  */
-function trackVisitor() {
+function trackVisitorUDID() {
     try {
         // Get or create UDID
         const udid = getOrCreateUDID();
@@ -328,12 +328,12 @@ function hideNotification(notification) {
  * Initialize visitor tracking
  * Called when the page loads
  */
-function initVisitorTracking() {
+async function initVisitorTracking() {
     try {
         console.log('[Visitor Tracker] Initializing visitor tracking...');
         
         // Track the current visitor
-        const visitorData = trackVisitor();
+        const visitorData = trackVisitorUDID();
         
         if (visitorData) {
             console.log('[Visitor Tracker] Visitor tracked successfully:', visitorData);
@@ -427,7 +427,7 @@ window.visitorTracker = {
     getStats: getVisitorStats,
     exportJSON: exportVisitorsJSON,
     clearData: clearVisitorData,
-    trackVisitor: trackVisitor
+    trackVisitor: trackVisitorUDID
 };
 
 // Add CSS styles for notifications
