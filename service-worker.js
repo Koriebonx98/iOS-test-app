@@ -5,7 +5,8 @@ const STATIC_ASSETS = [
     './index.html',
     './styles.css',
     './app.js',
-    './manifest.json'
+    './manifest.json',
+    './version.json'
 ];
 
 // Check for updates every 5 minutes
@@ -171,6 +172,9 @@ async function checkForUpdates() {
             if (newVersion.version !== cachedVersion.version) {
                 console.log('[Service Worker] New version available:', newVersion.version);
                 
+                // Update manifest.json with new version
+                await updateManifestVersion(newVersion.version);
+                
                 // Notify all clients about the update
                 const clients = await self.clients.matchAll();
                 clients.forEach(client => {
@@ -189,5 +193,40 @@ async function checkForUpdates() {
         await cache.put(VERSION_FILE, new Response(JSON.stringify(newVersion)));
     } catch (error) {
         console.error('[Service Worker] Error checking for updates:', error);
+    }
+}
+
+// Update manifest.json with new version
+async function updateManifestVersion(version) {
+    try {
+        // Fetch the current manifest
+        const manifestResponse = await fetch('./manifest.json', {
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        });
+        
+        if (!manifestResponse.ok) {
+            console.log('[Service Worker] Failed to fetch manifest');
+            return;
+        }
+        
+        const manifest = await manifestResponse.json();
+        
+        // Update the version in the manifest
+        manifest.version = version;
+        
+        // Cache the updated manifest
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put('./manifest.json', new Response(JSON.stringify(manifest), {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }));
+        
+        console.log('[Service Worker] Updated manifest.json to version:', version);
+    } catch (error) {
+        console.error('[Service Worker] Error updating manifest:', error);
     }
 }
