@@ -13,16 +13,50 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs').promises;
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Path to visitors.json in the repository root (parent directory)
-const VISITORS_FILE = path.join(__dirname, '..', 'visitors.json');
+// Validate that the path stays within the repository
+const REPO_ROOT = path.join(__dirname, '..');
+const VISITORS_FILE = path.join(REPO_ROOT, 'visitors.json');
 
-// Enable CORS for all origins (since this is a public webhook)
-app.use(cors());
+// Security: Validate that the file path is within the repository
+if (!VISITORS_FILE.startsWith(REPO_ROOT)) {
+    console.error('Security Error: Invalid file path detected');
+    process.exit(1);
+}
+
+// Rate limiting configuration
+// Allows 100 requests per 15 minutes per IP address
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: { 
+        success: false,
+        error: 'Too many requests from this IP, please try again later.' 
+    },
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// CORS configuration
+// For production, restrict to specific origins
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://koriebonx98.github.io'] // Restrict to your domain in production
+        : '*', // Allow all origins in development
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Apply rate limiting to all routes
+app.use(limiter);
 
 /**
  * Health check endpoint

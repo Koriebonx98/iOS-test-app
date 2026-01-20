@@ -30,7 +30,7 @@ jobs:
             udid: "${{ github.event.client_payload.udid }}",
             firstVisit: "${{ github.event.client_payload.firstVisit }}",
             lastVisit: "${{ github.event.client_payload.lastVisit }}",
-            visitCount: parseInt("${{ github.event.client_payload.visitCount }}" || '1'),
+            visitCount: parseInt("${{ github.event.client_payload.visitCount }}", 10) || 1,
             userAgent: "${{ github.event.client_payload.userAgent }}",
             screenSize: "${{ github.event.client_payload.screenSize }}",
             language: "${{ github.event.client_payload.language }}",

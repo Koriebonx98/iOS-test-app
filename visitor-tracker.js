@@ -395,7 +395,6 @@ async function trackVisitorUDID() {
         const existingVisitorIndex = visitors.findIndex(v => v.udid === udid);
         
         let visitorData;
-        let isRealVisitor = true; // Assume all visitors are real unless proven otherwise
         
         if (existingVisitorIndex !== -1) {
             // Update existing visitor record
