@@ -1,7 +1,7 @@
 {
   "short_name": "iOSApp",
   "name": "Progressive Web App",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",

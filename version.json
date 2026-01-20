@@ -1,5 +1,5 @@
 {
-  "version": "1.0.6",
-  "buildDate": "2026-01-20T15:00:00.000Z",
-  "description": "Update to version 1.0.6 to refresh app and site for changes."
+  "version": "1.0.7",
+  "buildDate": "2026-01-20T16:07:30.000Z",
+  "description": "Version 1.0.7: Implemented version-aware cache management to automatically clear old caches and fetch latest CV when version changes."
 }
