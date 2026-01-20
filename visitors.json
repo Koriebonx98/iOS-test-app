@@ -1,1 +1,4 @@
-[]
+{
+  "_note": "This file represents the structure for visitor tracking data. In the browser environment, actual visitor data is stored in localStorage under the key 'visitors_data' because browsers cannot directly write to JSON files for security reasons. For server-side persistence, integrate with a backend API (see server/server.js for an example).",
+  "visitors": []
+}
