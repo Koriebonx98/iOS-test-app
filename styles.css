@@ -245,7 +245,7 @@ footer p {
 }
 
 .dropdown-content.active {
-    max-height: 500px;
+    max-height: 2000px;
     opacity: 1;
     margin-top: 15px;
 }
