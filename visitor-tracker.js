@@ -28,7 +28,6 @@ const VISITOR_CONFIG = {
     
     // GitHub API settings
     USE_GITHUB_API: true, // Use GitHub API instead of backend server
-    GITHUB_ENABLED: true, // Enable GitHub integration
     FALLBACK_TO_LOCALSTORAGE: true, // Fallback to localStorage if GitHub API fails
     
     // Legacy API settings (deprecated, kept for backward compatibility)
@@ -200,7 +199,7 @@ function addToPendingQueue(visitorData) {
  * @returns {Promise<boolean>} True if successful, false otherwise
  */
 async function sendVisitorDataToGitHub(visitorData) {
-    if (!VISITOR_CONFIG.USE_GITHUB_API || !VISITOR_CONFIG.GITHUB_ENABLED) {
+    if (!VISITOR_CONFIG.USE_GITHUB_API) {
         console.log('[Visitor Tracker] GitHub API integration disabled');
         return false;
     }

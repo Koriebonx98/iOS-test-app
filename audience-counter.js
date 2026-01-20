@@ -207,7 +207,7 @@ async function getAudienceCountFromGitHub() {
     try {
         // Check if GitHub API helper is loaded
         if (typeof window.githubAPI === 'undefined') {
-            console.error('[Audience] GitHub API helper not loaded');
+            console.error('[Audience] GitHub API helper not loaded. Please include github-api-helper.js before this script.');
             return 0;
         }
         

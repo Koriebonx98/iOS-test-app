@@ -73,7 +73,7 @@ async function githubAPIRequest(endpoint, options = {}) {
     };
     
     if (GITHUB_CONFIG.GITHUB_TOKEN) {
-        headers['Authorization'] = `token ${GITHUB_CONFIG.GITHUB_TOKEN}`;
+        headers['Authorization'] = `Bearer ${GITHUB_CONFIG.GITHUB_TOKEN}`;
     }
     
     // Create an AbortController for timeout
@@ -153,10 +153,19 @@ async function updateFileInGitHub(filePath, content, commitMessage, sha, branch 
             throw new Error('GitHub token not configured. Cannot update repository files.');
         }
         
-        // Prevent concurrent updates
+        // Prevent concurrent updates with proper waiting
         if (githubState.isUpdating) {
             console.warn('[GitHub API] Update already in progress. Waiting...');
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Wait for current update to complete (max 10 seconds)
+            const maxWaitTime = 10000;
+            const waitInterval = 500;
+            let waitedTime = 0;
+            
+            while (githubState.isUpdating && waitedTime < maxWaitTime) {
+                await new Promise(resolve => setTimeout(resolve, waitInterval));
+                waitedTime += waitInterval;
+            }
+            
             if (githubState.isUpdating) {
                 throw new Error('Another update is in progress. Please try again.');
             }
@@ -166,8 +175,18 @@ async function updateFileInGitHub(filePath, content, commitMessage, sha, branch 
         
         console.log(`[GitHub API] Updating file: ${filePath} with SHA: ${sha ? sha.substring(0, 7) + '...' : 'null (new file)'}`);
         
-        // Encode content to base64
-        const base64Content = btoa(unescape(encodeURIComponent(content)));
+        // Encode content to base64 using modern approach
+        let base64Content;
+        if (typeof TextEncoder !== 'undefined') {
+            // Modern browsers - use TextEncoder
+            const encoder = new TextEncoder();
+            const bytes = encoder.encode(content);
+            const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join('');
+            base64Content = btoa(binString);
+        } else {
+            // Fallback for older browsers
+            base64Content = btoa(decodeURIComponent(encodeURIComponent(content)));
+        }
         
         // Prepare request payload
         const payload = {
@@ -193,7 +212,11 @@ async function updateFileInGitHub(filePath, content, commitMessage, sha, branch 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             console.error('[GitHub API] Update failed:', errorData);
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Unknown error'}`);
+            
+            // Create error with status code for better handling
+            const error = new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Unknown error'}`);
+            error.status = response.status;
+            throw error;
         }
         
         const data = await response.json();
@@ -254,11 +277,11 @@ async function updateFileWithRetry(filePath, updateFn, commitMessage, retryCount
     } catch (error) {
         console.error(`[GitHub API] Update attempt ${retryCount + 1} failed:`, error.message);
         
-        // Check if this is a conflict error (409)
-        const isConflict = error.message.includes('409') || error.message.includes('does not match');
+        // Check if this is a conflict error (409) using status code
+        const isConflict = error.status === 409 || error.message.includes('409');
         
         // Retry logic
-        if (retryCount < GITHUB_CONFIG.MAX_RETRIES && (isConflict || retryCount < 1)) {
+        if (retryCount < GITHUB_CONFIG.MAX_RETRIES && isConflict) {
             const delay = GITHUB_CONFIG.RETRY_DELAY * (retryCount + 1); // Exponential backoff
             console.log(`[GitHub API] Retrying in ${delay / 1000} seconds...`);
             await new Promise(resolve => setTimeout(resolve, delay));
