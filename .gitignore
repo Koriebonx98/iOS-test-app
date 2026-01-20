@@ -15,7 +15,11 @@ Thumbs.db
 tmp/
 temp/
 
+# Test files
+test-visitor-tracker.html
+
 # Server files
 server/node_modules/
 server/.env
 server/data/audience.json
+server/data/visitors.json
