@@ -26,8 +26,13 @@ const VISITOR_CONFIG = {
     STORAGE_KEY_VISIT_COUNT: 'visitor_visit_count',
     STORAGE_KEY_PENDING_QUEUE: 'visitor_pending_queue',
     
-    // API settings
-    API_ENABLED: true,
+    // GitHub API settings
+    USE_GITHUB_API: true, // Use GitHub API instead of backend server
+    GITHUB_ENABLED: true, // Enable GitHub integration
+    FALLBACK_TO_LOCALSTORAGE: true, // Fallback to localStorage if GitHub API fails
+    
+    // Legacy API settings (deprecated, kept for backward compatibility)
+    API_ENABLED: false,
     API_URL: 'http://localhost:3000/track', // Change to your production URL
     MAX_RETRIES: 3,
     RETRY_DELAY: 2000, // 2 seconds
@@ -189,7 +194,51 @@ function addToPendingQueue(visitorData) {
 }
 
 /**
- * Send visitor data to API endpoint with retry logic
+ * Send visitor data to GitHub repository with retry logic
+ * 
+ * @param {Object} visitorData - Visitor data to send
+ * @returns {Promise<boolean>} True if successful, false otherwise
+ */
+async function sendVisitorDataToGitHub(visitorData) {
+    if (!VISITOR_CONFIG.USE_GITHUB_API || !VISITOR_CONFIG.GITHUB_ENABLED) {
+        console.log('[Visitor Tracker] GitHub API integration disabled');
+        return false;
+    }
+
+    // Check if GitHub API helper is loaded
+    if (typeof window.githubAPI === 'undefined') {
+        console.error('[Visitor Tracker] GitHub API helper not loaded. Please include github-api-helper.js before visitor-tracker.js');
+        return false;
+    }
+
+    try {
+        console.log('[Visitor Tracker] Sending visitor data to GitHub repository...');
+        
+        const result = await window.githubAPI.updateVisitor(visitorData);
+        
+        if (result.success) {
+            console.log('[Visitor Tracker] Successfully updated visitor data in GitHub repository');
+            console.log('[Visitor Tracker] Total visitors:', result.totalVisitors);
+            return true;
+        } else {
+            throw new Error('GitHub API update failed');
+        }
+        
+    } catch (error) {
+        console.error('[Visitor Tracker] Error sending visitor data to GitHub:', error.message);
+        
+        // Fallback to localStorage if enabled
+        if (VISITOR_CONFIG.FALLBACK_TO_LOCALSTORAGE) {
+            console.log('[Visitor Tracker] Falling back to localStorage storage');
+            addToPendingQueue(visitorData);
+        }
+        
+        return false;
+    }
+}
+
+/**
+ * Send visitor data to API endpoint with retry logic (legacy support)
  * 
  * @param {Object} visitorData - Visitor data to send
  * @param {number} retryCount - Current retry attempt (default 0)
@@ -197,7 +246,7 @@ function addToPendingQueue(visitorData) {
  */
 async function sendVisitorDataToAPI(visitorData, retryCount = 0) {
     if (!VISITOR_CONFIG.API_ENABLED) {
-        console.log('[Visitor Tracker] API integration disabled');
+        console.log('[Visitor Tracker] Legacy API integration disabled');
         return false;
     }
 
@@ -378,8 +427,12 @@ async function trackVisitorUDID() {
         localStorage.setItem(VISITOR_CONFIG.STORAGE_KEY_LAST_VISIT, visitorState.lastVisit);
         localStorage.setItem(VISITOR_CONFIG.STORAGE_KEY_VISIT_COUNT, visitorState.visitCount.toString());
         
-        // Send data to API endpoint
-        await sendVisitorDataToAPI(visitorData);
+        // Send data to GitHub repository (primary) or API endpoint (fallback)
+        if (VISITOR_CONFIG.USE_GITHUB_API) {
+            await sendVisitorDataToGitHub(visitorData);
+        } else {
+            await sendVisitorDataToAPI(visitorData);
+        }
         
         return {
             udid: visitorState.udid,

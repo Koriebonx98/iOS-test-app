@@ -32,7 +32,10 @@
  * - No sensitive data exposure (only anonymous UUIDs tracked)
  */
 const AUDIENCE_CONFIG = {
-    // Backend API URL - update this to your deployed server URL with HTTPS
+    // GitHub API integration (primary method)
+    USE_GITHUB_API: true, // Use GitHub API to read visitor count
+    
+    // Backend API URL - update this to your deployed server URL with HTTPS (legacy support)
     // Example: 'https://your-server.herokuapp.com/api/audience'
     API_URL: 'http://localhost:3000/api/audience',
     
@@ -196,10 +199,40 @@ async function trackVisitor() {
 }
 
 /**
- * Get current audience count from backend
+ * Get current audience count from GitHub repository
+ * 
+ * @returns {Promise<number>} Current audience count
+ */
+async function getAudienceCountFromGitHub() {
+    try {
+        // Check if GitHub API helper is loaded
+        if (typeof window.githubAPI === 'undefined') {
+            console.error('[Audience] GitHub API helper not loaded');
+            return 0;
+        }
+        
+        const count = await window.githubAPI.getVisitorCount();
+        console.log('[Audience] Count fetched from GitHub:', count);
+        return count;
+        
+    } catch (error) {
+        console.error('[Audience] Error fetching count from GitHub:', error);
+        // Return cached count or 0 if fetch fails
+        return audienceState.currentCount || 0;
+    }
+}
+
+/**
+ * Get current audience count from backend (legacy support)
  * @returns {Promise<number>} Current audience count
  */
 async function getAudienceCount() {
+    // Use GitHub API if enabled
+    if (AUDIENCE_CONFIG.USE_GITHUB_API) {
+        return await getAudienceCountFromGitHub();
+    }
+    
+    // Otherwise use legacy backend API
     try {
         const response = await fetch(`${AUDIENCE_CONFIG.API_URL}/count`, {
             method: 'GET',
@@ -257,10 +290,21 @@ async function initAudienceTracking() {
     try {
         console.log('[Audience] Initializing audience tracking...');
         
-        // Check if CryptoJS is loaded
-        if (typeof CryptoJS === 'undefined') {
-            console.error('[Audience] CryptoJS library not loaded. Please include CryptoJS CDN in HTML.');
-            return;
+        // Check if we're using GitHub API
+        if (AUDIENCE_CONFIG.USE_GITHUB_API) {
+            // Check if GitHub API helper is loaded
+            if (typeof window.githubAPI === 'undefined') {
+                console.error('[Audience] GitHub API helper not loaded. Please include github-api-helper.js in HTML.');
+                return;
+            }
+            
+            console.log('[Audience] Using GitHub API for visitor tracking');
+        } else {
+            // Check if CryptoJS is loaded for legacy API
+            if (typeof CryptoJS === 'undefined') {
+                console.error('[Audience] CryptoJS library not loaded. Please include CryptoJS CDN in HTML.');
+                return;
+            }
         }
         
         // Check if we're online
@@ -271,8 +315,8 @@ async function initAudienceTracking() {
         
         audienceState.isTracking = true;
         
-        // Track this visitor and get initial count
-        const count = await trackVisitor();
+        // Get initial count from GitHub or backend
+        const count = await getAudienceCount();
         updateAudienceDisplay(count);
         
         // Set up periodic updates
@@ -306,8 +350,8 @@ async function refreshAudienceCount() {
             return;
         }
         
-        // Track visit (updates count on server) and get updated count
-        const count = await trackVisitor();
+        // Get updated count from GitHub or backend
+        const count = await getAudienceCount();
         updateAudienceDisplay(count);
         
         // Show success feedback
