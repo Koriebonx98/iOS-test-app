@@ -128,14 +128,16 @@ The app includes an intelligent auto-update mechanism that keeps all users on th
 - Responsive to orientation changes
 
 ### Visitor Tracking
-The app includes a client-side visitor tracking system that monitors unique visitors anonymously:
+The app includes a client-side visitor tracking system that monitors unique visitors anonymously and syncs with a backend server:
 
 **How it works:**
 - **Unique Identification**: Each visitor receives a UDID (Unique Device Identifier) on their first visit, stored in localStorage
 - **Privacy First**: Only anonymous UDIDs are tracked - no personal information is collected
 - **Automatic Tracking**: Every page visit is automatically tracked and logged
+- **API Integration**: Visitor data is sent to a backend API endpoint for persistent storage
+- **Retry Logic**: Failed API requests are retried up to 3 times with exponential backoff
+- **Offline Queue**: When offline or API is unavailable, data is queued in localStorage and sent later
 - **Returning Visitors**: Returning visitors are recognized by their stored UDID, and their visit count is updated
-- **Client-Side Storage**: All visitor data is stored in localStorage (simulating `visitors.json`)
 - **User Notification**: Visitors are notified about tracking via a friendly notification message
 - **Detailed Logging**: All tracking activity is logged to the browser console for transparency
 
@@ -150,8 +152,17 @@ The app includes a client-side visitor tracking system that monitors unique visi
 - Platform
 - Time zone
 
+**Backend API Integration:**
+The visitor tracker now sends data to a backend API endpoint (configurable in `visitor-tracker.js`):
+- **Endpoint**: POST `/track` - Accepts visitor data and stores it in `visitors.json` on the server
+- **Retry Logic**: Up to 3 retry attempts with 2-second delays
+- **Offline Support**: Failed requests are queued and processed when connection is restored
+- **Auto-sync**: Pending queue is processed every 5 minutes automatically
+
+For API configuration and setup, see [VISITOR_TRACKER_API.md](VISITOR_TRACKER_API.md)
+
 **How `visitors.json` Works:**
-Since browsers cannot directly write to files for security reasons, visitor data is stored in localStorage under the key `visitors_data`. This simulates the `visitors.json` file mentioned in the requirements. The data structure is identical to what would be stored in a JSON file:
+Visitor data is stored both locally (in localStorage) and on the backend server (in `visitors.json`). The backend file serves as the authoritative source and is updated via the POST `/track` endpoint:
 
 ```json
 [
@@ -164,7 +175,8 @@ Since browsers cannot directly write to files for security reasons, visitor data
     "screenSize": "1920x1080",
     "language": "en-US",
     "platform": "MacIntel",
-    "timeZone": "America/New_York"
+    "timeZone": "America/New_York",
+    "lastUpdated": "2026-01-20T20:30:00.500Z"
   }
 ]
 ```
@@ -174,7 +186,10 @@ Since browsers cannot directly write to files for security reasons, visitor data
 - Use `window.visitorTracker.getStats()` in the console to get current visitor statistics
 - Use `window.visitorTracker.exportJSON()` to export all visitor data as JSON
 - Use `window.visitorTracker.clearData()` to clear all visitor tracking data
+- Use `window.visitorTracker.getPendingQueue()` to see queued items waiting to be sent
+- Use `window.visitorTracker.processPendingQueue()` to manually process the queue
 - The tracking module is in `visitor-tracker.js`
+- Backend API server is in `server/server.js`
 
 **Privacy Features:**
 - ✅ No personal information collected
@@ -182,7 +197,7 @@ Since browsers cannot directly write to files for security reasons, visitor data
 - ✅ Transparent logging in console
 - ✅ User notification about tracking
 - ✅ Easy data clearing option
-- ✅ No external servers or third-party tracking
+- ✅ Secure backend API with CORS protection
 
 ### Live Audience Counter
 The app includes a sophisticated audience tracking system that demonstrates modern web development practices:
