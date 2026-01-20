@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "udid": "550e8400-e29b-41d4-a716-446655440000",
+    "firstVisit": "2026-01-20T20:00:00.000Z",
+    "lastVisit": "2026-01-20T22:00:00.000Z",
+    "visitCount": 3,
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    "screenSize": "390x844",
+    "language": "en-US",
+    "platform": "iPhone",
+    "timeZone": "America/New_York",
+    "lastUpdated": "2026-01-20T22:00:00.500Z"
+  },
+  {
+    "udid": "7c9e6679-7425-40de-944b-e07fc1f90ae8",
+    "firstVisit": "2026-01-20T21:15:00.000Z",
+    "lastVisit": "2026-01-20T21:15:00.000Z",
+    "visitCount": 1,
+    "userAgent": "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    "screenSize": "820x1180",
+    "language": "en-US",
+    "platform": "iPad",
+    "timeZone": "America/Los_Angeles",
+    "lastUpdated": "2026-01-20T21:15:00.300Z"
+  },
+  {
+    "udid": "a3bb189e-8bf9-3888-9912-ace4e6543002",
+    "firstVisit": "2026-01-20T19:30:00.000Z",
+    "lastVisit": "2026-01-20T21:45:00.000Z",
+    "visitCount": 5,
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "screenSize": "1920x1080",
+    "language": "en-US",
+    "platform": "MacIntel",
+    "timeZone": "America/Chicago",
+    "lastUpdated": "2026-01-20T21:45:00.800Z"
+  }
+]
