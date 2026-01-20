@@ -216,7 +216,7 @@ async function loadVersionInfo() {
             localStorage.setItem('appVersion', JSON.stringify({
                 version: versionData.version,
                 manifestVersion: manifestData.version,
-                lastChecked: new Date().toISOString()
+                lastChecked: new Date().toISOString() // Useful for debugging and future cache expiration logic
             }));
         } catch (storageError) {
             console.warn('[App] Failed to cache version in localStorage:', storageError);

@@ -172,10 +172,7 @@ self.addEventListener('message', (event) => {
 async function checkForUpdates() {
     try {
         const response = await fetch(VERSION_FILE, {
-            cache: 'no-cache',
-            headers: {
-                'Cache-Control': 'no-cache'
-            }
+            cache: 'no-cache'
         });
         
         if (!response.ok) {
@@ -230,10 +227,7 @@ async function updateManifestVersion(version) {
     try {
         // Fetch the latest manifest from server to use as base
         const manifestResponse = await fetch('./manifest.json', {
-            cache: 'no-cache',
-            headers: {
-                'Cache-Control': 'no-cache'
-            }
+            cache: 'no-cache'
         });
         
         if (!manifestResponse.ok) {
@@ -246,7 +240,7 @@ async function updateManifestVersion(version) {
         // Update only the version field to match version.json
         manifest.version = version;
         
-        // Store the updated manifest in cache
+        // Store the updated manifest in cache using consistent URL format
         const cache = await caches.open(CACHE_NAME);
         await cache.put('./manifest.json', new Response(JSON.stringify(manifest), {
             headers: {
