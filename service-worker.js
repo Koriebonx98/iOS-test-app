@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ios-test-app-cache-v3';
+const CACHE_NAME = 'ios-test-app-cache-v1.0.3';
 const VERSION_FILE = './version.json';
 const STATIC_ASSETS = [
     './',
