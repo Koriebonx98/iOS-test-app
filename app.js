@@ -182,10 +182,16 @@ async function loadVersionInfo() {
     try {
         // Fetch version from version.json
         const versionResponse = await fetch('./version.json');
+        if (!versionResponse.ok) {
+            throw new Error(`Failed to fetch version.json: ${versionResponse.status}`);
+        }
         const versionData = await versionResponse.json();
         
         // Fetch version from manifest.json
         const manifestResponse = await fetch('./manifest.json');
+        if (!manifestResponse.ok) {
+            throw new Error(`Failed to fetch manifest.json: ${manifestResponse.status}`);
+        }
         const manifestData = await manifestResponse.json();
         
         const versionInfo = document.getElementById('versionInfo');

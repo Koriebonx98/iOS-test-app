@@ -35,6 +35,8 @@ self.addEventListener('fetch', (event) => {
                 .then((response) => {
                     // Clone the response to store it in cache
                     const responseToCache = response.clone();
+                    // Note: Cache update is intentionally not awaited (fire-and-forget pattern)
+                    // to avoid delaying the response. This is standard practice in service workers.
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put(event.request, responseToCache);
                     });
@@ -55,6 +57,8 @@ self.addEventListener('fetch', (event) => {
                 .then((response) => {
                     // Clone the response to store it in cache
                     const responseToCache = response.clone();
+                    // Note: Cache update is intentionally not awaited (fire-and-forget pattern)
+                    // to avoid delaying the response. This is standard practice in service workers.
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put(event.request, responseToCache);
                     });
