@@ -1,5 +1,5 @@
 // Cache name will be set dynamically based on version.json
-let CACHE_NAME = 'ios-test-app-cache-v1.0.7'; // Initial default, will be updated
+let CACHE_NAME = 'ios-test-app-cache-v1.0.8'; // Initial default, will be updated
 const VERSION_FILE = './version.json';
 const STATIC_ASSETS = [
     './',

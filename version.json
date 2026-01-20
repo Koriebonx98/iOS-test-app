@@ -1,5 +1,5 @@
 {
-  "version": "1.0.7",
-  "buildDate": "2026-01-20T16:07:30.000Z",
-  "description": "Version 1.0.7: Implemented version-aware cache management to automatically clear old caches and fetch latest CV when version changes."
+  "version": "1.0.8",
+  "buildDate": "2026-01-20",
+  "description": "Version 1.0.8: Updated version references across all relevant files for the new release."
 }
