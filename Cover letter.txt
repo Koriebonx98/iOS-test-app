@@ -1,0 +1,34 @@
+
+Hello, I’m Korie — a UI‑driven developer and systems designer who specialises in building console‑style environments, developer tools, and secure, data‑driven platforms.
+
+My work focuses on creating polished, responsive interfaces and OS‑layer experiences that feel cohesive, intuitive, and fast. I design systems that go beyond traditional web development — environments that behave like full platforms, complete with navigation frameworks, user profiles, settings layers, plugin support, and secure distribution models.
+
+Over the past few years, I’ve built a collection of interconnected projects that demonstrate my approach to engineering:
+
+• PS5 OS — a full OS‑layer environment with a login screen, settings system, quick menu, controller navigation, plugin architecture, auto‑launch mode, and shell‑replacement capability.
+• Game OS — a Windows‑based launcher and media/game manager with drive‑scanning logic, custom UI components, and a console‑style UX.
+• AppStore — a secure, JSON‑driven software distribution platform that links directly to GitHub repositories for transparent, malware‑resistant installation and updates.
+• iOS Test App — a mobile‑first web application that serves as my interactive CV, portfolio, and live demonstration of my UI and front‑end capabilities.
+• BBC iPlayer Desktop App — a custom media playback environment with a bespoke UI.
+• Playnite Tools — automation scripts, metadata utilities, and launcher integrations.
+
+
+Across all of these projects, I’ve focused on UI/UX design, system architecture, multi‑platform compatibility, and secure, transparent distribution. I use modern development tools — including AI‑assisted workflows — to rapidly prototype, refine, and ship features. Every project is directed, structured, and architected by me, from the logic and data models to the user experience and visual design.
+
+My strengths include:
+
+• Front‑end development (HTML, CSS, JavaScript)
+• UI/UX systems and responsive design
+• C#/WPF desktop application development
+• JSON‑driven interfaces and data modelling
+• App ecosystems, launchers, and OS‑layer environments
+• Secure, repo‑based software distribution
+• Controller‑driven navigation
+• Multi‑platform design (Windows, Linux, macOS via Wine/Proton)
+• Rapid learning and iterative development
+
+
+I’m passionate about building experiences that feel smooth, cohesive, and thoughtfully designed — whether that’s a web interface, a desktop environment, or a full OS‑layer system. I’m now looking for an opportunity to bring this mindset to a team where I can contribute to real products, collaborate with experienced developers, and continue growing as a front‑end and platform engineer.
+
+Thank you for taking the time to explore my work.
+This app contains my projects, skills, and live demonstrations of what I can build.
