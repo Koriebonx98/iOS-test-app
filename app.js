@@ -180,20 +180,64 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load and display version information
 async function loadVersionInfo() {
     try {
-        const response = await fetch('./version.json');
-        const versionData = await response.json();
+        // Fetch version from version.json
+        const versionResponse = await fetch('./version.json');
+        if (!versionResponse.ok) {
+            throw new Error(`Failed to fetch version.json: ${versionResponse.status}`);
+        }
+        const versionData = await versionResponse.json();
+        
+        // Fetch version from manifest.json
+        const manifestResponse = await fetch('./manifest.json');
+        if (!manifestResponse.ok) {
+            throw new Error(`Failed to fetch manifest.json: ${manifestResponse.status}`);
+        }
+        const manifestData = await manifestResponse.json();
         
         const versionInfo = document.getElementById('versionInfo');
         if (versionInfo) {
+            // Display the version to users
             versionInfo.textContent = `Version: ${versionData.version}`;
+            
+            // Log version mismatch for debugging (if any)
+            if (versionData.version !== manifestData.version) {
+                console.warn('[App] Version mismatch detected:', {
+                    versionJson: versionData.version,
+                    manifestJson: manifestData.version
+                });
+            }
         }
         
         console.log('[App] Current version:', versionData.version);
+        console.log('[App] Manifest version:', manifestData.version);
+        
+        // Store version in localStorage for offline use
+        try {
+            localStorage.setItem('appVersion', JSON.stringify({
+                version: versionData.version,
+                manifestVersion: manifestData.version,
+                lastChecked: new Date().toISOString() // Useful for debugging and future cache expiration logic
+            }));
+        } catch (storageError) {
+            console.warn('[App] Failed to cache version in localStorage:', storageError);
+        }
     } catch (error) {
         console.error('[App] Failed to load version info:', error);
         const versionInfo = document.getElementById('versionInfo');
         if (versionInfo) {
-            versionInfo.textContent = 'Version: Unknown';
+            // Try to load from localStorage if offline
+            try {
+                const savedVersion = localStorage.getItem('appVersion');
+                if (savedVersion) {
+                    const versionObj = JSON.parse(savedVersion);
+                    versionInfo.textContent = `Version: ${versionObj.version} (Offline)`;
+                } else {
+                    versionInfo.textContent = 'Version: Unknown';
+                }
+            } catch (storageError) {
+                console.warn('[App] Failed to parse cached version from localStorage:', storageError);
+                versionInfo.textContent = 'Version: Unknown';
+            }
         }
     }
 }
