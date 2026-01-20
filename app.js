@@ -216,11 +216,16 @@ async function loadVersionInfo() {
         const versionInfo = document.getElementById('versionInfo');
         if (versionInfo) {
             // Try to load from localStorage if offline
-            const savedVersion = localStorage.getItem('appVersion');
-            if (savedVersion) {
-                const versionObj = JSON.parse(savedVersion);
-                versionInfo.textContent = `Version: ${versionObj.version} (Offline)`;
-            } else {
+            try {
+                const savedVersion = localStorage.getItem('appVersion');
+                if (savedVersion) {
+                    const versionObj = JSON.parse(savedVersion);
+                    versionInfo.textContent = `Version: ${versionObj.version} (Offline)`;
+                } else {
+                    versionInfo.textContent = 'Version: Unknown';
+                }
+            } catch (storageError) {
+                console.warn('[App] Failed to parse cached version from localStorage:', storageError);
                 versionInfo.textContent = 'Version: Unknown';
             }
         }
